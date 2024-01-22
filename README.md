@@ -11,7 +11,8 @@
 - you can Cahnge max Bountys that are Shown
 - you can add more Bountys in Config
 - by Default 10 Locations Pre Configured
-
+- Heist System Added you can now rob stores or banks or whatever you wanna rob
+- Can be configured in Config
 
 # Changelog
 
