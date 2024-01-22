@@ -1,11 +1,42 @@
 local VORPcore = exports.vorp_core:GetCore()
 local BccUtils = exports['bcc-utils'].initiate()
 local FeatherMenu =  exports['feather-menu'].initiate()
+local MiniGame = exports['bcc-minigames'].initiate()
 
 local getbounty = 0
 local MissionActive = false
 local dist = nil
 local CreatedOutlaws = {}
+
+
+
+local HeistActive = false
+local spawnedtresor = false
+local CreatedCops = {}
+
+---------------------------------------------------------------------------------
+----------------------------Minigame Settings------------------------------------
+---------------------------------------------------------------------------------
+local lockpicksettings = {
+    focus = true, -- Should minigame take nui focus
+    cursor = true, -- Should minigame have cursor  (required for lockpick)
+    maxattempts = 3, -- How many fail attempts are allowed before game over
+    threshold = 10, -- +- threshold to the stage degree (bigger number means easier)
+    hintdelay = 500, --milliseconds delay on when the circle will shake to show lockpick is in the right position.
+    stages = {
+        {
+            deg = 25 -- 0-360 degrees
+        },
+        {
+            deg = 0 -- 0-360 degrees
+        },
+        {
+            deg = 300 -- 0-360 degrees
+        }
+    }
+    
+}
+
 ---------------------------------------------------------------------------------
 
 Citizen.CreateThread(function()
@@ -100,6 +131,18 @@ Citizen.CreateThread(function()  --- RegisterFeather Menu
         end
     end)
     BountyBoardPage1:RegisterElement('button', {
+        label =  Config.StartHeist,
+        style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px'
+        },
+    }, function()
+        TriggerEvent('mms-bounty:client:startheist')
+        BountyBoard:Close({ 
+        })
+    end)
+    BountyBoardPage1:RegisterElement('button', {
         label =  Config.LabelAbort,
         style = {
         ['background-color'] = '#FF8C00',
@@ -108,6 +151,16 @@ Citizen.CreateThread(function()  --- RegisterFeather Menu
         },
     }, function()
         TriggerEvent('mms-bounty:client:abortbounty')
+    end)
+    BountyBoardPage1:RegisterElement('button', {
+        label =  Config.LabelAbortHeist,
+        style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px'
+        },
+    }, function()
+        TriggerEvent('mms-bounty:client:abortheist')
     end)
     BountyBoardPage1:RegisterElement('button', {
         label =  Config.CloseBoard,
@@ -368,4 +421,199 @@ function Reset()
     AreaBlip:Remove()
 	CreatedOutlaws = {}
     MissionActive = false
+end
+
+---------------------------------------------------------------------------------
+----------------------------------HEIST PART-------------------------------------
+---------------------------------------------------------------------------------
+
+RegisterNetEvent('mms-bounty:client:abortheist')
+AddEventHandler('mms-bounty:client:abortheist',function()
+    BountyBoard:Close({})
+    if HeistActive == true then
+        ResetHeist()
+        VORPcore.NotifyTip(Config.ActiveHeistAborted, 5000)
+    else
+        VORPcore.NotifyTip(Config.NoActiveHeist, 5000)
+    end
+end)
+
+RegisterNetEvent('mms-bounty:client:startheist')
+AddEventHandler('mms-bounty:client:startheist',function()
+    if HeistActive == false then
+        VORPcore.NotifyTip(Config.HeistStartetSuccessfully, 5000)
+        HeistActive = true
+        local randomheist = math.random(1,#Config.HeistMissions)
+            local selected = Config.HeistMissions[randomheist]
+            CheckDistanceToHeist(selected)
+            
+    else
+        VORPcore.NotifyTip(Config.AlreadyHeistActive, 5000)
+    end
+end)
+
+function CheckDistanceToHeist(selected)
+    local Tresor = selected.Tresor
+    local Cops = selected.Cops
+    local TresorHeading = selected.TresorHeading
+    HeistBlip = BccUtils.Blips:SetBlip(Config.HeistBlip, 'blip_ambient_bounty_hunter', 0.2, Tresor.x,Tresor.y,Tresor.z)
+    local notnear = true
+    while notnear == true and HeistActive == true do
+        Citizen.Wait(250)
+    local playerCoords = GetEntityCoords(PlayerPedId())
+        dist = #(playerCoords - Tresor)
+    if dist < 30 then
+        notnear = false
+        TriggerEvent('mms-bounty:client:heisttresor',Tresor,Cops,TresorHeading)
+        --SpawnEnemys(Tresor,Cops)
+    end
+end
+end
+
+RegisterNetEvent('mms-bounty:client:heisttresor')
+AddEventHandler('mms-bounty:client:heisttresor',function(Tresor,Cops,TresorHeading)
+    local TresorGroupPrompt = BccUtils.Prompts:SetupPromptGroup()
+    tresorprompt = TresorGroupPrompt:RegisterPrompt(Config.TresorPromptName, 0x760A9C6F, 1, 1, true, 'hold', {timedeventhash = 'MEDIUM_TIMED_EVENT'})
+    local tresormodel = GetHashKey('s_vault_med_r_val_bent02x')
+    while not HasModelLoaded(tresormodel) do
+        Wait(10)
+        RequestModel(tresormodel)
+    end
+    if spawnedtresor == false then
+        
+            createdtresor = CreateObject(tresormodel, Tresor.x,Tresor.y,Tresor.z -1, true, false, false)
+            SetEntityHeading(createdtresor,TresorHeading)
+            SetEntityAsMissionEntity(createdtresor, true)
+            PlaceObjectOnGroundProperly(createdtresor, true)
+            FreezeEntityPosition(createdtresor, true)
+            spawnedtresor = true
+        
+            while spawnedtresor == true do
+                Wait(10)
+                local playerCoords = GetEntityCoords(PlayerPedId())
+                local distance = #(playerCoords - Tresor)
+                if distance < 2 then
+                    TresorGroupPrompt:ShowGroup(Config.TresorPromptName)
+        
+                    BccUtils.Misc.DrawText3D(Tresor.x,Tresor.y,Tresor.z, Config.PickThatTresor)
+                    if tresorprompt:HasCompleted() then
+                        TriggerServerEvent('mms-bounty:server:checklockpick',Cops)
+                    end
+                end
+                
+            end
+    end
+end)
+
+
+RegisterNetEvent('mms-bounty:client:haslockpick')
+AddEventHandler('mms-bounty:client:haslockpick',function(Cops)
+    MiniGame.Start('lockpick', lockpicksettings, function(result)
+        if result.unlocked == true then
+            VORPcore.NotifyTip(Config.LockpickingSuccess, 5000)
+            Citizen.Wait(3000)
+            TriggerServerEvent('mms-bounty:server:heistreward')
+            SpawnCops(Cops)
+        else
+            VORPcore.NotifyTip(Config.LockpickingFailed, 5000)
+        end
+    end)
+end)
+
+
+function SpawnCops(Cops)
+    local modelHash = GetHashKey(Config.CopModel)
+	while not HasModelLoaded(modelHash) do
+		RequestModel(modelHash)
+		Citizen.Wait(0)
+	end
+    for key, v in pairs(Cops) do
+        local PlayerPedAttack = PlayerPedId()
+	local copped = CreatePed(modelHash, v.x,v.y,v.z, true, true, false, false)
+	if DoesEntityExist(copped) then
+		SetPedRelationshipGroupHash(copped, `bandits`)
+		SetRelationshipBetweenGroups(5, `PLAYER`, `bandits`)
+		SetRelationshipBetweenGroups(5, `bandits`, `PLAYER`)
+		Citizen.InvokeNative(0x283978A15512B2FE, copped, true)
+		Citizen.InvokeNative(0x23f74c2fda6e7c61,953018525, copped)
+		TaskCombatPed(copped, PlayerPedAttack)
+		SetEntityAsMissionEntity(copped, true, true)
+		Citizen.InvokeNative(0x740CB4F3F602C9F4, copped, true)
+		CreatedCops[#CreatedCops + 1] = copped
+		
+	end
+    end
+    SetModelAsNoLongerNeeded(modelHash)
+    CheckifDeadOrEscaped()
+end
+
+
+function CheckifDeadOrEscaped()
+    local startcoords = GetEntityCoords(PlayerPedId())
+    
+    local chekifdead = 1
+    local player = PlayerPedId()
+    while chekifdead == 1 do
+        Citizen.Wait(250)
+        local numberOfAlivePeds = GetNumberOfAliveCops()
+        local numberofDeadPeds = GetNumberOfDeadCops()
+        local playerCoords = GetEntityCoords(PlayerPedId())
+        local escapedistance = #(playerCoords - startcoords)
+        if IsEntityDead(player) then
+            VORPcore.NotifyTip(Config.YouDied, 10000)
+            ResetHeist()
+            chekifdead = 0
+        elseif numberOfAlivePeds == 0 then
+            VORPcore.NotifyTip(Config.YouKilledAllCops, 5000)
+            ResetHeist()
+            chekifdead = 0
+        elseif escapedistance > 300 then
+            VORPcore.NotifyTip(Config.YouAreEscaped, 5000)
+            ResetHeist()
+            chekifdead = 0
+        end
+	end
+
+end
+
+function GetNumberOfAliveCops()
+    local numberOfAlivePeds = 0
+    for _, peds in ipairs(CreatedCops) do
+		if DoesEntityExist(peds) then
+			if not IsEntityDead(peds) then
+				numberOfAlivePeds = numberOfAlivePeds + 1
+			end
+		end
+    end
+    return numberOfAlivePeds
+end
+
+function GetNumberOfDeadCops()
+    local numberofDeadPeds = 0
+    for _, peds in ipairs(CreatedCops) do
+		if DoesEntityExist(peds) then
+			if IsEntityDead(peds) then
+				numberofDeadPeds = numberofDeadPeds + 1
+			end
+		end
+    end
+    return numberofDeadPeds
+end
+
+function ResetHeist()
+
+	for _, peds in ipairs(CreatedCops) do
+		if DoesEntityExist(peds) then
+				DeletePed(peds)
+				DeleteEntity(peds)
+			SetEntityAsMissionEntity(ped, false, false)
+			SetEntityAsNoLongerNeeded(ped)
+		end
+	end
+    HeistBlip:Remove()
+    tresorprompt:DeletePrompt()
+    DeleteObject(createdtresor)
+	CreatedCops = {}
+    HeistActive = false
+    spawnedtresor = false
 end

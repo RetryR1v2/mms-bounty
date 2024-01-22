@@ -19,6 +19,8 @@
 - 1.1.3
 - Added Blips for Enemys
 - Fixed Bug with Middle Bountys 
+- 1.1.4
+- Added Heist System you can now Rob Saves with the lockpickitem
 
 # installation 
 
@@ -28,6 +30,7 @@
 - Vorp_Core 
 - Feather Menu by BCC https://github.com/FeatherFramework/feather-menu/releases/latest
 - bcc-utils
+- bcc-minigames
 
 # CREDITS
 - Vorp_Outlaws ( For Ped Creations )

@@ -134,6 +134,27 @@ RegisterServerEvent('mms-bounty:server:reward',function(reward)
     Character.addCurrency(0, reward)
     VORPcore.NotifyTip(src, Config.RewardGet .. reward .. '$',  5000)
 end)
+
+
+RegisterServerEvent('mms-bounty:server:checklockpick',function(Cops)
+    local src = source
+    local itemCount = exports.vorp_inventory:getItemCount(src, nil, Config.LockpickItem,nil)
+        if itemCount > 0 then
+            exports.vorp_inventory:subItem(src, Config.LockpickItem, 1)
+            TriggerClientEvent('mms-bounty:client:haslockpick',src,Cops)
+        else
+            VORPcore.NotifyTip(src, Config.MissingLockpick,  5000)
+        end
+end)
+
+RegisterServerEvent('mms-bounty:server:heistreward',function()
+    local heistreward = math.random(Config.HeistRewardMin,Config.HeistRewardMax)
+    local src = source
+    local Character = VORPcore.getUser(src).getUsedCharacter
+    Character.addCurrency(0, heistreward)
+    VORPcore.NotifyTip(src, Config.HeistRewardGet .. heistreward .. '$',  5000)
+end)
+
 --------------------------------------------------------------------------------------------------
 -- start version check
 --------------------------------------------------------------------------------------------------

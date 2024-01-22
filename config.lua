@@ -342,6 +342,94 @@ Config.HardMissions = {
     },
 }
 
+Config.LockpickItem = 'lockpick'
+Config.HeistRewardMin = 75
+Config.HeistRewardMax = 100
+Config.CopModel = 'CS_VALSHERIFF'
+
+Config.HeistMissions = {
+    {
+    Tresor = vector3(1287.43, -1314.5, 77.04), --- Bank Rhodes
+    TresorHeading = 47.92,
+    Cops = {
+            [1] = vector3(1288.51, -1299.28, 77.04),   --- Every Number is 1 Enemy if you add more you need to Continue with [6] .. [7] ...
+            [2] = vector3(1297.46, -1302.83, 77.04),
+            [3] = vector3(1298.28, -1308.47, 76.58),
+            [4] = vector3(1280.97, -1319.98, 76.79),
+            [5] = vector3(1272.17, -1307.52, 76.31),
+            [6] = vector3(1278.51, -1292.22, 76.2),
+            [7] = vector3(1293.31, -1289.12, 76.27),
+        }
+    },
+    {
+        Tresor = vector3(2831.46, -1311.19, 46.76),  -- SaintDenise General Store
+        TresorHeading = 134.31,
+        Cops = {
+            [1] = vector3(2840.36, -1317.86, 46.37),   --- Every Number is 1 Enemy if you add more you need to Continue with [6] .. [7] ...
+            [2] = vector3(2848.98, -1297.99, 46.35),
+            [3] = vector3(2835.49, -1285.94, 46.73),
+            [4] = vector3(2818.26, -1286.68, 46.81),
+            [5] = vector3(2787.8, -1328.13, 46.25),
+            [6] = vector3(2799.38, -1350.14, 46.71),
+            [7] = vector3(2827.45, -1362.81, 45.69),
+        }
+    },
+    {
+        Tresor = vector3(1004.85, -1769.28, 51.99),  -- Braithworth Mannor 
+        TresorHeading = 0.58,
+        Cops = {
+            [1] = vector3(1006.43, -1758.26, 47.61),   --- Every Number is 1 Enemy if you add more you need to Continue with [6] .. [7] ...
+            [2] = vector3(1024.88, -1751.56, 46.55),
+            [3] = vector3(1045.28, -1776.02, 46.91),
+            [4] = vector3(1032.48, -1804.76, 46.61),
+            [5] = vector3(1010.62, -1812.11, 46.62),
+            [6] = vector3(987.93, -1805.18, 46.11),
+            [7] = vector3(973.76, -1777.19, 46.83),
+        }
+    },
+    {
+        Tresor = vector3(-878.3, -1326.91, 43.97),  -- Post Office Blackwater
+        TresorHeading = 177.48,
+        Cops = {
+            [1] = vector3(-859.99, -1311.79, 43.05),   --- Every Number is 1 Enemy if you add more you need to Continue with [6] .. [7] ...
+            [2] = vector3(-824.6, -1308.44, 43.58),
+            [3] = vector3(-811.02, -1343.19, 43.67),
+            [4] = vector3(-827.26, -1349.12, 43.62),
+            [5] = vector3(-845.38, -1375.08, 43.42),
+            [6] = vector3(-862.84, -1384.75, 43.57),
+            [7] = vector3(-883.22, -1389.3, 44.23),
+        }
+    },
+    {
+        Tresor = vector3(-1795.34, -385.43, 160.33),  -- Strawberry General Store
+        TresorHeading = 325.04,
+        Cops = {
+            [1] = vector3(-1820.23, -378.53, 161.71),   --- Every Number is 1 Enemy if you add more you need to Continue with [6] .. [7] ...
+            [2] = vector3(-1811.33, -360.42, 162.1),
+            [3] = vector3(-1771.7, -363.73, 160.19),
+            [4] = vector3(-1771.55, -409.57, 155.18),
+            [5] = vector3(-1795.27, -423.85, 156.1),
+            [6] = vector3(-1781.08, -427.73, 155.0),
+            [7] = vector3(-1767.03, -411.28, 155.01),
+        }
+    },
+    {
+        Tresor = vector3(2949.5, 1321.19, 44.82),  -- Annesburg Gun Store
+        TresorHeading = 78.73,
+        Cops = {
+            [1] = vector3(2912.18, 1343.48, 48.12),   --- Every Number is 1 Enemy if you add more you need to Continue with [6] .. [7] ...
+            [2] = vector3(2898.15, 1336.21, 50.22),
+            [3] = vector3(2889.58, 1331.97, 54.49),
+            [4] = vector3(2897.19, 1320.62, 48.08),
+            [5] = vector3(2906.77, 1305.38, 45.3),
+            [6] = vector3(2909.68, 1287.52, 44.27),
+            [7] = vector3(2917.44, 1279.36, 44.47),
+        }
+    },
+
+}
+
+
 -----------------------------------------------------------------------------------------------------
 ----------------------------------Tanslations--------------------------------------------------------
 -----------------------------------------------------------------------------------------------------
@@ -360,6 +448,7 @@ Config.Middle = 'Mittel'
 Config.Hard = 'Schwer'
 Config.AlreadyHasMission = 'Du hast Bereits ein Auftrag gestartet'
 Config.MissionBlip = 'Missions Gebiet'
+Config.HeistBlip = 'Gebiet des Raubes'
 Config.MissionStartet = 'Mission Gestartet gehe zum Missions Gebiet'
 Config.MissionFailed = 'Mission Fehlgeschlagen'
 Config.MissionSuccess = 'Mission Erfolgreich Abgeschlossen'
@@ -368,3 +457,20 @@ Config.KiledEnemys = 'Gegner Getötet: '
 Config.RewardGet = 'Deine Belohnung ist: '
 Config.NoActiveBounty = 'Keine Mission zum Abbrechen'
 Config.ActiveMissionAborted = 'Aktuelle Mission Abgebrochen'
+Config.StartHeist = 'Starte einen Raub'
+Config.TresorPromptName = 'Tresor'
+Config.PickThatTresor = 'Tresor Knacken'
+Config.MissingLockpick = 'Du hast keinen Dietrich'
+Config.LockpickingSuccess = 'Tresor erfolgreich Aufgebrochen Renn Weg oder Kämpfe'
+Config.LockpickingFailed = 'Tresor Knacken Fehlgeschlagen Probiers nochmal'
+Config.YouAreEscaped = 'Du bist Entkommen'
+Config.HeistRewardGet = 'Raub Erfolgreich du Bekommst: '
+Config.YouKilledAllCops = 'Du hast deine Verfolger getötet Hau ab!'
+Config.YouDied = 'Du bist am Tatort Gestorben mal sehen wer dich zuerst Findet Sheriffs oder deine Freunde'
+Config.NoActiveHeist = 'Kein Aktiven Raub'
+Config.ActiveHeistAborted = 'Aktiven Raub Abgebrochen'
+Config.LabelAbortHeist = 'Raub Abbrechen'
+Config.AlreadyHeistActive = 'Du begehst bereits einen Raub'
+Config.HeistStartetSuccessfully = 'Raub Gestartet schau auf der Karte wo du hin Musst!'
+
+

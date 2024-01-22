@@ -3,7 +3,7 @@ rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aw
 game 'rdr3'
 
 description 'mms-bounty'
-version '1.1.3'
+version '1.1.4'
 author 'Markus Mueller'
 
 client_scripts {
@@ -25,6 +25,7 @@ dependency {
 	--'ox_lib',  --https://overextended.dev/ox_lib
 	'bcc-utils',
 	'feather-menu',
+	'bcc-minigames'
 }
 
 lua54 'yes'
