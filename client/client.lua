@@ -249,7 +249,7 @@ AddEventHandler('mms-bounty:client:startbounty',function(id,difficulty,name,rewa
             CheckDistance(selected,reward)
         elseif difficulty == Config.Middle then
             local randommiddle = math.random(1,#Config.MiddleMissions)
-            local selected = Config.EasyMissions[randommiddle]
+            local selected = Config.MiddleMissions[randommiddle]
             CheckDistance(selected,reward)
         elseif difficulty == Config.Hard then
             local randomhard = math.random(1,#Config.HardMissions)
@@ -293,7 +293,7 @@ function SpawnEnemys(selected,reward)
 		SetRelationshipBetweenGroups(5, `PLAYER`, `bandits`)
 		SetRelationshipBetweenGroups(5, `bandits`, `PLAYER`)
 		Citizen.InvokeNative(0x283978A15512B2FE, bountyped, true)
-		Citizen.InvokeNative(0x23f74c2fda6e7c61,305281166, bountyped)
+		Citizen.InvokeNative(0x23f74c2fda6e7c61,953018525, bountyped)
 		TaskCombatPed(bountyped, PlayerPedAttack)
 		SetEntityAsMissionEntity(bountyped, true, true)
 		Citizen.InvokeNative(0x740CB4F3F602C9F4, bountyped, true)

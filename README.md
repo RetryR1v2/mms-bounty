@@ -16,6 +16,9 @@
 # Changelog
 
 - Initial Release Version 1.1.2
+- 1.1.3
+- Added Blips for Enemys
+- Fixed Bug with Middle Bountys 
 
 # installation 
 
