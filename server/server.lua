@@ -4,6 +4,7 @@ local diff = nil
 local reward = nil
 local bountycount = nil
 local sheriffbountycount = nil
+local userjob = nil
 -----------------------------------------------------------------------
 -- version checker
 -----------------------------------------------------------------------
@@ -215,6 +216,35 @@ RegisterServerEvent('mms-bounty:server:deletesheriffbountyfromdb',function(id)
             VORPcore.NotifyTip(src, 'Error This Id not in Database ( Database Error Contact Support)!',  5000)
         end
     end)
+end)
+
+-------------------------------- Alert Active Cops ------------------------------------
+
+RegisterServerEvent('mms-bounty:server:alertpolice',function(Tresor)
+for _, player in ipairs(GetPlayers()) do
+    local Character = VORPcore.getUser(player).getUsedCharacter
+        userjob = Character.job
+        for y, e in pairs(Config.Jobs) do
+            if userjob == e.JobName then
+                TriggerClientEvent('mms-bounty:client:alertpolice',player,Tresor)
+                VORPcore.NotifyTip(player, Config.HeistActive, 10000)
+            end
+        end
+end
+end)
+
+RegisterServerEvent('mms-bounty:server:removeblip',function()
+    for _, player in ipairs(GetPlayers()) do
+        local Character = VORPcore.getUser(player).getUsedCharacter
+            userjob = Character.job
+            for y, e in pairs(Config.Jobs) do
+                if userjob == e.JobName then
+                    TriggerClientEvent('mms-bounty:client:removeblip',player)
+                    --VORPcore.NotifyTip(source, Config.HeistActive, 10000)
+                end
+            end
+    end
+
 end)
 
 --------------------------------------------------------------------------------------------------

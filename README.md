@@ -28,7 +28,12 @@
 - You now can Configure if heist missions should be shown or not
 - Sheriffs can now Add Coustom Missions to Board to Get Bounty on Players 
 - Need to Run The mms_sheriffbounty.sql  
-- New Depency ox_lix
+- New Depency ox_lib
+- 1.1.6
+- Config.HeistNpcs = true  --- true / false If NPC Police is Spawning or Not
+- Config.HeistAlerts = true  --- true / false Alert sheriff is heist is active  Jobs Defined in Config.Jobs
+- Added Alerts if heist ist active 
+- Added Blip if Heist is active
 
 
 # installation 

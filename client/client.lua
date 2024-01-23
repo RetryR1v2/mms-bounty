@@ -21,7 +21,7 @@ local deg3 = 0
 
 local playerjob = nil
 local getsheriffbounty = 0
-
+local PoliceHeistBlipCreated = false
 ---------------------------------------------------------------------------------
 ------------------------------Get Playerjob--------------------------------------
 ---------------------------------------------------------------------------------
@@ -738,11 +738,21 @@ function CheckDistanceToHeist(selected)
         dist = #(playerCoords - Tresor)
     if dist < 30 then
         notnear = false
+        if Config.HeistAlerts == true then
+        TriggerServerEvent('mms-bounty:server:alertpolice',Tresor)
+        end
         TriggerEvent('mms-bounty:client:heisttresor',Tresor,Cops,TresorHeading)
         --SpawnEnemys(Tresor,Cops)
     end
 end
 end
+
+RegisterNetEvent('mms-bounty:client:alertpolice')
+AddEventHandler('mms-bounty:client:alertpolice',function(Tresor)
+    PoliceHeistBlip = BccUtils.Blips:SetBlip(Config.PoliceHeistBlip, 'blip_ambient_bounty_hunter', 0.2, Tresor.x,Tresor.y,Tresor.z)
+    print('Test')
+    PoliceHeistBlipCreated = true
+end)
 
 RegisterNetEvent('mms-bounty:client:heisttresor')
 AddEventHandler('mms-bounty:client:heisttresor',function(Tresor,Cops,TresorHeading)
@@ -790,7 +800,11 @@ AddEventHandler('mms-bounty:client:haslockpick',function(Cops)
             VORPcore.NotifyTip(Config.LockpickingSuccess, 5000)
             Citizen.Wait(3000)
             TriggerServerEvent('mms-bounty:server:heistreward')
-            SpawnCops(Cops)
+            if Config.HeistNpcs == true then
+                SpawnCops(Cops)
+            elseif Config.HeistNpcs == false then
+                ResetHeist()
+            end
         else
             VORPcore.NotifyTip(Config.LockpickingFailed, 5000)
         end
@@ -878,7 +892,7 @@ function GetNumberOfDeadCops()
 end
 
 function ResetHeist()
-
+    if Config.HeistNpcs == true then
 	for _, peds in ipairs(CreatedCops) do
 		if DoesEntityExist(peds) then
 				DeletePed(peds)
@@ -887,10 +901,24 @@ function ResetHeist()
 			SetEntityAsNoLongerNeeded(ped)
 		end
 	end
+    end
     HeistBlip:Remove()
+    if spawnedtresor == true then
     tresorprompt:DeletePrompt()
+    end
     DeleteObject(createdtresor)
 	CreatedCops = {}
+    
+        TriggerServerEvent('mms-bounty:server:removeblip')
+    
     HeistActive = false
     spawnedtresor = false
 end
+
+RegisterNetEvent('mms-bounty:client:removeblip')
+AddEventHandler('mms-bounty:client:removeblip',function ()
+    if Config.HeistAlerts == true and PoliceHeistBlipCreated == true then
+        PoliceHeistBlip:Remove()
+        PoliceHeistBlipCreated = false
+    end
+end)

@@ -360,7 +360,9 @@ Config.LockpickItem = 'lockpick'
 Config.HeistRewardMin = 75
 Config.HeistRewardMax = 100
 Config.CopModel = 'CS_VALSHERIFF'
-Config.LuckyItemsActive = true
+Config.LuckyItemsActive = true  --- true / false If items in Saves Too
+Config.HeistNpcs = true  --- true / false If NPC Police is Spawning or Not
+Config.HeistAlerts = true  --- true / false Alert sheriff is heist is active  Jobs Defined in Config.Jobs
 
 Config.LuckyItems = {
     {
@@ -513,3 +515,5 @@ Config.SheriffBountyDeleteReally = 'Willst du das  Kopfgeld \n Wirklich Löschen
 Config.Yes = 'Ja'
 Config.No = 'Nein'
 Config.SheriffBountyDelted = 'Kopfgeld Gelöscht'
+Config.HeistActive = 'Ein Raub ist im Gange Stoppe die Täter'
+Config.PoliceHeistBlip = 'Verhindere den Raub'
