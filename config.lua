@@ -7,6 +7,19 @@ Config.CreateBountyTime = 10  -- Create New Bounty Every 60 Min
 Config.MaxBountys = 20
 Config.DistanceSpawnEnemys = 60  --- Enemys Spawn if you are 60 Meters Away or Closer
 
+Config.Jobs= {
+    {
+        JobName = 'police',
+    },
+    {
+        JobName = 'sheriff',
+    },
+    {
+        JobName = 'marshall',
+    },
+}
+
+
 Config.BountyBoards = {
     {coords = vector3(-766.86, -1260.96, 43.56)},   --- Also the Location of Blip (Blackwater)  
     {coords = vector3(-272.43, 804.47, 119.34)},   --- Also the Location of Blip and Npc (Valentine) 
@@ -342,10 +355,24 @@ Config.HardMissions = {
     },
 }
 
+Config.HeistMissionsActive = true
 Config.LockpickItem = 'lockpick'
 Config.HeistRewardMin = 75
 Config.HeistRewardMax = 100
 Config.CopModel = 'CS_VALSHERIFF'
+Config.LuckyItemsActive = true
+
+Config.LuckyItems = {
+    {
+        LuckyItem = 'diamond'
+    },
+    {
+        LuckyItem = 'emerald'
+    },
+    {
+        LuckyItem = 'goldring'
+    },
+}
 
 Config.HeistMissions = {
     {
@@ -472,5 +499,17 @@ Config.ActiveHeistAborted = 'Aktiven Raub Abgebrochen'
 Config.LabelAbortHeist = 'Raub Abbrechen'
 Config.AlreadyHeistActive = 'Du begehst bereits einen Raub'
 Config.HeistStartetSuccessfully = 'Raub Gestartet schau auf der Karte wo du hin Musst!'
-
-
+Config.HeistRewardGetItem = 'Du hast Glück in dem Tresor war Außerdem noch: '
+Config.SheriffAddMission = 'Kopfgeld Aussetzen'
+Config.Firstname = 'Vorname: '
+Config.Lastname = 'Nachname: '
+Config.Reason = 'Grund: '
+Config.Reward = 'Belohnung: '
+Config.AddBounty = 'Kopfgeld Aussetzen'
+Config.SheriffBountySet = 'Kopfgeld Ausgesetzt'
+Config.GetSheriffBountyList = 'Sheriff Aufträge'
+Config.SheriffBountyDelete = 'Kopfgeld Löschen ?'
+Config.SheriffBountyDeleteReally = 'Willst du das  Kopfgeld \n Wirklich Löschen ?'
+Config.Yes = 'Ja'
+Config.No = 'Nein'
+Config.SheriffBountyDelted = 'Kopfgeld Gelöscht'

@@ -3,6 +3,7 @@ local VORPcore = exports.vorp_core:GetCore()
 local diff = nil
 local reward = nil
 local bountycount = nil
+local sheriffbountycount = nil
 -----------------------------------------------------------------------
 -- version checker
 -----------------------------------------------------------------------
@@ -153,6 +154,67 @@ RegisterServerEvent('mms-bounty:server:heistreward',function()
     local Character = VORPcore.getUser(src).getUsedCharacter
     Character.addCurrency(0, heistreward)
     VORPcore.NotifyTip(src, Config.HeistRewardGet .. heistreward .. '$',  5000)
+    Citizen.Wait(3000)
+    if Config.LuckyItemsActive == true then
+        local randomitemtable = math.random(1,#Config.LuckyItems)
+        local getrandomitem = Config.LuckyItems[randomitemtable]
+        local randomitemname = getrandomitem.LuckyItem
+        local chance = math.random(1,10)
+        local amount = math.random(1,3)
+        if chance > 8 then
+            exports.vorp_inventory:addItem(src, randomitemname,amount, nil,nil)
+            VORPcore.NotifyTip(src, Config.HeistRewardGetItem .. randomitemname,  5000)
+        end
+    end
+end)
+
+-------------------------------- SHERIFF BountyAdd ------------------------------------
+
+RegisterServerEvent('mms-bounty:server:getplayerjob',function()
+    local src = source
+    local Character = VORPcore.getUser(src).getUsedCharacter
+    local job = Character.job
+    TriggerClientEvent('mms-bounty:client:getplayerjob',src,job)
+end)
+
+RegisterServerEvent('mms-bounty:server:addsheriffbounty',function(inputFirstname,inputLastname,inputReason,inputReward)
+    local src = source
+    MySQL.insert('INSERT INTO `mms_sheriffbounty` (firstname, lastname, reason, reward) VALUES (?, ?, ?, ?)', {inputFirstname,inputLastname,inputReason,inputReward}, function()end)
+    VORPcore.NotifyTip(src, Config.SheriffBountySet,  5000)
+end)
+
+RegisterServerEvent('mms-bounty:server:getsheriffbountyfromdb',function()
+    local src = source
+    local count = MySQL.query.await('SELECT COUNT(*) FROM mms_sheriffbounty;')[1]
+    for _,v in pairs(count) do
+        bountycount = v
+    end
+    MySQL.query('SELECT `id`,`firstname`, `lastname`, `reason`, `reward` FROM `mms_sheriffbounty`', {}, function(result)
+        
+        if result and #result ~= nil and bountycount > 0 then
+            local sheriffeintraege = {}
+            for _, sheriff in ipairs(result) do
+                table.insert(sheriffeintraege, sheriff)
+            end
+                TriggerClientEvent('mms-bounty:client:sheriffbountylist', src, sheriffeintraege)
+        elseif bountycount == 0 then
+            VORPcore.NotifyTip(src, Config.NoBountys, 5000)
+            TriggerClientEvent('mms-bounty:client:nobounty', src)
+        end
+    end)
+end)
+
+RegisterServerEvent('mms-bounty:server:deletesheriffbountyfromdb',function(id)
+    local src = source
+    MySQL.query('SELECT * FROM mms_sheriffbounty WHERE id = ?', {id}, function(result)
+        if result ~= nil then
+            MySQL.execute('DELETE FROM mms_sheriffbounty WHERE id = ?', { id }, function()
+            end)
+            VORPcore.NotifyTip(src, Config.SheriffBountyDelted,  5000)
+        else
+            VORPcore.NotifyTip(src, 'Error This Id not in Database ( Database Error Contact Support)!',  5000)
+        end
+    end)
 end)
 
 --------------------------------------------------------------------------------------------------

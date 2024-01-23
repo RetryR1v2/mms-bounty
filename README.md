@@ -22,16 +22,26 @@
 - Fixed Bug with Middle Bountys 
 - 1.1.4
 - Added Heist System you can now Rob Saves with the lockpickitem
+- 1.1.5 
+- Changed Lockpick Settings to random (Not Always the Same MiniGame)
+- You now can Configure if Items will be in the Tresor Too 
+- You now can Configure if heist missions should be shown or not
+- Sheriffs can now Add Coustom Missions to Board to Get Bounty on Players 
+- Need to Run The mms_sheriffbounty.sql  
+- New Depency ox_lix
+
 
 # installation 
 
 - Run the SQL files to add Tables in your DB
+
 
 # Required
 - Vorp_Core 
 - Feather Menu by BCC https://github.com/FeatherFramework/feather-menu/releases/latest
 - bcc-utils
 - bcc-minigames
+- ox-lib
 
 # CREDITS
 - Vorp_Outlaws ( For Ped Creations )

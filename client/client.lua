@@ -14,6 +14,33 @@ local HeistActive = false
 local spawnedtresor = false
 local CreatedCops = {}
 
+local deg1 = 0
+local deg2 = 0
+local deg3 = 0
+
+
+local playerjob = nil
+local getsheriffbounty = 0
+
+---------------------------------------------------------------------------------
+------------------------------Get Playerjob--------------------------------------
+---------------------------------------------------------------------------------
+Citizen.CreateThread(function()
+    while playerjob == nil do
+        Citizen.Wait(1000)
+        TriggerServerEvent('mms-bounty:server:getplayerjob')
+    end
+end)
+
+RegisterNetEvent('mms-bounty:client:getplayerjob')
+AddEventHandler('mms-bounty:client:getplayerjob',function(job)
+    playerjob = job
+    if playerjob == nil then
+        Citizen.Wait(500)
+    else
+        TriggerEvent('mms-bounty:client:registermenu')
+    end
+end)
 ---------------------------------------------------------------------------------
 ----------------------------Minigame Settings------------------------------------
 ---------------------------------------------------------------------------------
@@ -25,17 +52,18 @@ local lockpicksettings = {
     hintdelay = 500, --milliseconds delay on when the circle will shake to show lockpick is in the right position.
     stages = {
         {
-            deg = 25 -- 0-360 degrees
+            deg = deg1 -- 0-360 degrees
         },
         {
-            deg = 0 -- 0-360 degrees
+            deg = deg2 -- 0-360 degrees
         },
         {
-            deg = 300 -- 0-360 degrees
+            deg = deg3 -- 0-360 degrees
         }
     }
     
 }
+
 
 ---------------------------------------------------------------------------------
 
@@ -77,8 +105,8 @@ end)
 --------------------------------------- SEITE 1 Hauptmenü------------------------------------------------
 ---------------------------------------------------------------------------------------------------------
 
-
-Citizen.CreateThread(function()  --- RegisterFeather Menu
+RegisterNetEvent('mms-bounty:client:registermenu')
+AddEventHandler('mms-bounty:client:registermenu',function()
     BountyBoard = FeatherMenu:RegisterMenu('feather:character:bountyboardmenu', {
         top = '50%',
         left = '50%',
@@ -130,6 +158,7 @@ Citizen.CreateThread(function()  --- RegisterFeather Menu
         
         end
     end)
+    if Config.HeistMissionsActive == true then
     BountyBoardPage1:RegisterElement('button', {
         label =  Config.StartHeist,
         style = {
@@ -142,6 +171,37 @@ Citizen.CreateThread(function()  --- RegisterFeather Menu
         BountyBoard:Close({ 
         })
     end)
+    end
+    BountyBoardPage1:RegisterElement('button', {
+        label = Config.GetSheriffBountyList,
+        style = {
+            ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px'
+        },
+    }, function()
+        if getsheriffbounty == 0 then
+            TriggerEvent('mms-bounty:client:getsheriffbountyfromdb')
+            Citizen.Wait(250)
+        elseif getsheriffbounty == 1 then
+            BountyBoardPage4:UnRegister()
+            TriggerEvent('mms-bounty:client:getsheriffbountyfromdb')
+        end
+    end)
+    for y, e in pairs(Config.Jobs) do
+        if playerjob == e.JobName then
+            BountyBoardPage1:RegisterElement('button', {
+                label =  Config.SheriffAddMission,
+                style = {
+                ['background-color'] = '#FF8C00',
+                ['color'] = 'orange',
+                ['border-radius'] = '6px'
+                },
+            }, function()
+                BountyBoardPage3:RouteTo()
+            end)
+        end
+    end
     BountyBoardPage1:RegisterElement('button', {
         label =  Config.LabelAbort,
         style = {
@@ -152,6 +212,7 @@ Citizen.CreateThread(function()  --- RegisterFeather Menu
     }, function()
         TriggerEvent('mms-bounty:client:abortbounty')
     end)
+    if Config.HeistMissionsActive == true then
     BountyBoardPage1:RegisterElement('button', {
         label =  Config.LabelAbortHeist,
         style = {
@@ -162,6 +223,7 @@ Citizen.CreateThread(function()  --- RegisterFeather Menu
     }, function()
         TriggerEvent('mms-bounty:client:abortheist')
     end)
+    end
     BountyBoardPage1:RegisterElement('button', {
         label =  Config.CloseBoard,
         style = {
@@ -187,7 +249,124 @@ Citizen.CreateThread(function()  --- RegisterFeather Menu
         }
     })
 
+    ----------------------- Seite 3 Sheriff Add Bounty to DB ----
+    BountyBoardPage3 = BountyBoard:RegisterPage('seite3')
+    BountyBoardPage3:RegisterElement('header', {
+        value = Config.BoardHeader,
+        slot = 'header',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+    BountyBoardPage3:RegisterElement('line', {
+        slot = 'header',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+    local inputFirstname = ''
+    BountyBoardPage3:RegisterElement('input', {
+    label = Config.Firstname,
+    placeholder = "",
+    persist = false,
+    style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px',
+    }
+    }, function(data)
+        inputFirstname = data.value
+    end)
+    local inputLastname = ''
+    BountyBoardPage3:RegisterElement('input', {
+    label = Config.Lastname,
+    placeholder = "",
+    persist = false,
+    style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px'
+    }
+    }, function(data)
+        inputLastname = data.value
+    end)
+    local inputReason = ''
+    BountyBoardPage3:RegisterElement('input', {
+    label = Config.Reason,
+    placeholder = "",
+    persist = false,
+    style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px'
+    }
+    }, function(data)
+        inputReason = data.value
+    end)
+    local inputReward = ''
+    BountyBoardPage3:RegisterElement('input', {
+    label = Config.Reward,
+    placeholder = "$",
+    persist = false,
+    style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px'
+    }
+    }, function(data)
+        inputReward = data.value
+    end)
+    BountyBoardPage3:RegisterElement('button', {
+        label = Config.AddBounty,
+        style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px',
+        },
+    }, function()
+        TriggerEvent('mms-bounty:client:addbounty',inputFirstname,inputLastname,inputReason,inputReward)
+        BountyBoardPage1:RouteTo()
+    end)
+    BountyBoardPage3:RegisterElement('button', {
+        label =  Config.BackBounty,
+        style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px',
+        },
+    }, function()
+        BountyBoardPage1:RouteTo()
+    end)
+    BountyBoardPage3:RegisterElement('button', {
+        label =  Config.CloseBoard,
+        style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px',
+        },
+    }, function()
+        BountyBoard:Close({ 
+        })
+    end)
+    BountyBoardPage3:RegisterElement('subheader', {
+        value = Config.BoardHeader,
+        slot = 'footer',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+    BountyBoardPage3:RegisterElement('line', {
+        slot = 'footer',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
 
+end)
+
+RegisterNetEvent('mms-bounty:client:addbounty')
+AddEventHandler('mms-bounty:client:addbounty',function(inputFirstname,inputLastname,inputReason,inputReward)
+    TriggerServerEvent('mms-bounty:server:addsheriffbounty',inputFirstname,inputLastname,inputReason,inputReward)
 end)
 
 RegisterNetEvent('mms-bounty:client:getbountyfromdb')
@@ -196,10 +375,16 @@ AddEventHandler('mms-bounty:client:getbountyfromdb',function()
     TriggerServerEvent('mms-bounty:server:getbountyfromdb')
 end)
 
+RegisterNetEvent('mms-bounty:client:getsheriffbountyfromdb')
+AddEventHandler('mms-bounty:client:getsheriffbountyfromdb',function()
+    getsheriffbounty = 1
+    TriggerServerEvent('mms-bounty:server:getsheriffbountyfromdb')
+end)
 
 RegisterNetEvent('mms-bounty:client:nobounty')
 AddEventHandler('mms-bounty:client:nobounty',function()
     getbounty = 0
+    getsheriffbounty = 0
     --TriggerServerEvent('mms-bounty:server:getbountyfromdb')
 end)
 
@@ -274,6 +459,95 @@ AddEventHandler('mms-bounty:client:bountylist',function(eintraege)
     })
 
     BountyBoardPage2:RouteTo()
+end)
+
+RegisterNetEvent('mms-bounty:client:sheriffbountylist')
+AddEventHandler('mms-bounty:client:sheriffbountylist',function(sheriffeintraege)
+    
+    BountyBoardPage4 = BountyBoard:RegisterPage('seite4')
+    BountyBoardPage4:RegisterElement('header', {
+        value = Config.BoardHeader,
+        slot = 'header',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+    BountyBoardPage4:RegisterElement('line', {
+        slot = 'header',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+    for v, sheriff in ipairs(sheriffeintraege) do
+        local firstname = sheriff.firstname
+        local lastname = sheriff.lastname
+        local reason = sheriff.reason
+        local reward = sheriff.reward
+        local id = sheriff.id
+        local buttonLabel = Config.Firstname ..' '.. firstname ..' '.. Config.Lastname ..' '.. lastname ..' '.. Config.Reason ..' '.. reason ..' '.. Config.Reward ..' '.. reward .. '$'
+        BountyBoardPage4:RegisterElement('button', {
+            label = buttonLabel,
+            style = {
+            ['background-color'] = '#FF8C00',
+            ['color'] = 'orange',
+            ['border-radius'] = '6px'
+            }
+        }, function()
+            for y, e in pairs(Config.Jobs) do
+                if playerjob == e.JobName then
+            local alert = lib.alertDialog({
+                header = Config.SheriffBountyDelete,
+                content = Config.SheriffBountyDeleteReally,
+                centered = true,
+                cancel = true,
+                labels = {cancel = Config.No,confirm = Config.Yes}
+            })
+            if alert == 'confirm' then
+                TriggerServerEvent('mms-bounty:server:deletesheriffbountyfromdb',id)
+                BountyBoardPage1:RouteTo()
+            elseif alert == 'cancel' then
+                BountyBoardPage1:RouteTo()
+            end
+        end
+            end
+        end)
+    end
+    BountyBoardPage4:RegisterElement('button', {
+        label =  Config.BackBounty,
+        style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px'
+        },
+    }, function()
+        BountyBoardPage1:RouteTo()
+    end)
+    BountyBoardPage4:RegisterElement('button', {
+        label =  Config.CloseBoard,
+        style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px'
+        },
+    }, function()
+        BountyBoard:Close({ 
+        })
+    end)
+    BountyBoardPage4:RegisterElement('subheader', {
+        value = Config.BoardHeader,
+        slot = 'footer',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+    BountyBoardPage4:RegisterElement('line', {
+        slot = 'footer',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+
+    BountyBoardPage4:RouteTo()
 end)
 
 RegisterNetEvent('mms-bounty:client:abortbounty')
@@ -508,6 +782,9 @@ end)
 
 RegisterNetEvent('mms-bounty:client:haslockpick')
 AddEventHandler('mms-bounty:client:haslockpick',function(Cops)
+    deg1 = math.random(1,360)
+    deg2 = math.random(1,360)
+    deg3 = math.random(1,360)
     MiniGame.Start('lockpick', lockpicksettings, function(result)
         if result.unlocked == true then
             VORPcore.NotifyTip(Config.LockpickingSuccess, 5000)
