@@ -87,11 +87,15 @@ RegisterServerEvent('mms-bounty:server:addbountyonabort',function()
     local getrandomname = Config.Names[rn]
     local randomname = getrandomname.name
         MySQL.insert('INSERT INTO `mms_bounty` (difficulty, reward, name) VALUES (?, ?, ?)', {diff,reward,randomname}, function()end)
+        if Config.ServerConsolePrints == true then
         print(bountycount)
+        end
         Citizen.Wait(Config.CreateBountyTime*60000)
 else
     Citizen.Wait(Config.CreateBountyTime*60000)
+    if Config.ServerConsolePrints == true then
     print('Max Bounty Amount Cant Create More Bountys Bounty Count: '..bountycount)
+    end
 end
 end)
 

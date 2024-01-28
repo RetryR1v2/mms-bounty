@@ -34,6 +34,7 @@
 - Config.HeistAlerts = true  --- true / false Alert sheriff is heist is active  Jobs Defined in Config.Jobs
 - Added Alerts if heist ist active 
 - Added Blip if Heist is active
+- 1.1.7
 
 
 # installation 

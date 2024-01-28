@@ -84,7 +84,6 @@ local BountyBoardPrompt = BccUtils.Prompts:SetupPromptGroup()
         if dist < 2 then
             BountyBoardPrompt:ShowGroup(Config.PromptName)
 
-            --BccUtils.Misc.DrawText3D(plantcoords.x, plantcoords.y, plantcoords.z, _U('WaterCropPrompt'))
             if traderprompt:HasCompleted() then
                 TriggerEvent('mms-bounty:client:openboard') break
             end
@@ -592,7 +591,7 @@ end)
 
 
 function CheckDistance(selected,reward)--blip:Remove()
-    AreaBlip = BccUtils.Blips:SetBlip(Config.MissionBlip, 'blip_ambient_bounty_hunter', 0.2, selected[1].x,selected[1].y,selected[1].z)
+    AreaBlip = BccUtils.Blips:SetBlip(Config.MissionBlip, 'blip_ambient_hunter', 0.2, selected[1].x,selected[1].y,selected[1].z)
     local notnear = true
     while notnear == true and MissionActive == true do
         Citizen.Wait(250)
@@ -730,7 +729,7 @@ function CheckDistanceToHeist(selected)
     local Tresor = selected.Tresor
     local Cops = selected.Cops
     local TresorHeading = selected.TresorHeading
-    HeistBlip = BccUtils.Blips:SetBlip(Config.HeistBlip, 'blip_ambient_bounty_hunter', 0.2, Tresor.x,Tresor.y,Tresor.z)
+    HeistBlip = BccUtils.Blips:SetBlip(Config.HeistBlip, 'blip_mp_job_exclusive_large', 0.2, Tresor.x,Tresor.y,Tresor.z)
     local notnear = true
     while notnear == true and HeistActive == true do
         Citizen.Wait(250)
@@ -749,7 +748,7 @@ end
 
 RegisterNetEvent('mms-bounty:client:alertpolice')
 AddEventHandler('mms-bounty:client:alertpolice',function(Tresor)
-    PoliceHeistBlip = BccUtils.Blips:SetBlip(Config.PoliceHeistBlip, 'blip_ambient_bounty_hunter', 0.2, Tresor.x,Tresor.y,Tresor.z)
+    PoliceHeistBlip = BccUtils.Blips:SetBlip(Config.PoliceHeistBlip, 'blip_special_series_1', 0.2, Tresor.x,Tresor.y,Tresor.z)
     print('Test')
     PoliceHeistBlipCreated = true
 end)

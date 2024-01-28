@@ -1,5 +1,7 @@
 Config = {}
 
+Config.ServerConsolePrints = true
+
 Config.BoardBlips = true
 Config.BoardblipName = 'Auftragsbrett'  --- en = Boat Trader blip name
 Config.PromptName = 'Auftragsbrett'
