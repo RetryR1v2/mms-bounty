@@ -35,6 +35,10 @@
 - Added Alerts if heist ist active 
 - Added Blip if Heist is active
 - 1.1.7
+- Added Diffrent Blips for heist Sheriff Alert and Bounty
+- Changed Blip Size to Find Mission Area Easier on Map.
+- Added Config to Enable or Disable Prints in Server Console
+
 
 
 # installation 
