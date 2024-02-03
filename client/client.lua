@@ -612,8 +612,10 @@ function SpawnEnemys(selected,reward)
 		Citizen.Wait(0)
 	end
     for key, v in pairs(selected) do
+        
         local PlayerPedAttack = PlayerPedId()
-	local bountyped = CreatePed(modelHash, v.x,v.y,v.z, true, true, false, false)
+	    local bountyped = CreatePed(modelHash, v.x,v.y,v.z, true, true, false, false)
+        Citizen.Wait(250)
 	if DoesEntityExist(bountyped) then
 		SetPedRelationshipGroupHash(bountyped, `bandits`)
 		SetRelationshipBetweenGroups(5, `PLAYER`, `bandits`)
@@ -684,11 +686,12 @@ end
 function Reset()
 
 	for _, peds in ipairs(CreatedOutlaws) do
-		if DoesEntityExist(peds) then
-				DeletePed(peds)
-				DeleteEntity(peds)
+		if  DoesEntityExist(peds) then
+			DeletePed(peds)
+			DeleteEntity(peds)
 			SetEntityAsMissionEntity(ped, false, false)
 			SetEntityAsNoLongerNeeded(ped)
+            Citizen.Wait(250)
 		end
 	end
     AreaBlip:Remove()
