@@ -38,7 +38,9 @@
 - Added Diffrent Blips for heist Sheriff Alert and Bounty
 - Changed Blip Size to Find Mission Area Easier on Map.
 - Added Config to Enable or Disable Prints in Server Console
-
+- 1.1.8
+- Fixed Spawn Enemy Bug
+- Added More Enemys to Make it Harder now its more Fun
 
 
 # installation 
