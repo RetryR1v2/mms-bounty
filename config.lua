@@ -20,6 +20,9 @@ Config.Jobs= {
     },
 }
 
+Config.Easy = 'Einfach'
+Config.Middle = 'Mittel'     -------------- This Need to  Translated Here Bcs of MySql Error
+Config.Hard = 'Schwer'
 
 Config.BountyBoards = {
     {coords = vector3(-766.86, -1260.96, 43.56)},   --- Also the Location of Blip (Blackwater)  

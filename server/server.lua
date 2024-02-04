@@ -78,9 +78,11 @@ RegisterServerEvent('mms-bounty:server:addbountyonabort',function()
         reward = math.random(Config.MinEasyReward,Config.MaxEasyReward)
     elseif difficulty == 2 then
         diff = Config.Middle
+        print(diff)
         reward = math.random(Config.MinMiddleReward,Config.MaxMiddleReward)
     elseif difficulty == 3 then
         diff = Config.Hard
+        print(diff)
         reward = math.random(Config.MinHardReward,Config.MaxHardReward)
     end
     local rn = math.random(1,#Config.Names)

@@ -44,7 +44,8 @@
 - 1.1.9
 - Added RandomGuns to Enemys or you can give them 1 Specific Gun ( Special Thanks to Jannings for Help me)
 - Added Translation deafault = de_lang (Credits:Translation system from bcc used Copyd shared/locales.lua)
-
+- 1.2.0 
+- Fixed Database Bug Thanks for Reporting
 
 # installation 
 

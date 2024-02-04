@@ -569,15 +569,15 @@ AddEventHandler('mms-bounty:client:startbounty',function(id,difficulty,name,rewa
         TriggerServerEvent('mms-bounty:server:deletebounty',id)
         VORPcore.NotifyTip(_U('MissionStartet'), 5000)
         MissionActive = true
-        if difficulty == _U('Easy') then
+        if difficulty == Config.Easy then
             local randomeasy = math.random(1,#Config.EasyMissions)
             local selected = Config.EasyMissions[randomeasy]
             CheckDistance(selected,reward)
-        elseif difficulty == _U('Middle') then
+        elseif difficulty == Config.Middle then
             local randommiddle = math.random(1,#Config.MiddleMissions)
             local selected = Config.MiddleMissions[randommiddle]
             CheckDistance(selected,reward)
-        elseif difficulty == _U('Hard') then
+        elseif difficulty == Config.Hard then
             local randomhard = math.random(1,#Config.HardMissions)
             local selected = Config.HardMissions[randomhard]
             CheckDistance(selected,reward)
