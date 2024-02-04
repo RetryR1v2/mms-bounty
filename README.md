@@ -46,6 +46,8 @@
 - Added Translation deafault = de_lang (Credits:Translation system from bcc used Copyd shared/locales.lua)
 - 1.2.0 
 - Fixed Database Bug Thanks for Reporting
+- 1.2.1
+- Fixed Translation Bug thanks for Reporting
 
 # installation 
 

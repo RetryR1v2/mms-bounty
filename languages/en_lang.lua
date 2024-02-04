@@ -1,4 +1,6 @@
 Locales["en_lang"] = {
+BoardblipName = 'Bounty Board',
+PromptName = 'Bounty Board',
 Kill = 'Kill: ',
 LabelDiff = ' Difficulty: ',
 LabelReward = ' Reward: ',
