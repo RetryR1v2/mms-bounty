@@ -1,10 +1,9 @@
 Config = {}
 
+Config.defaultlang = "de_lang" -- Set Language (Current Languages: "en_lang" English, "de_lang" German)
 Config.ServerConsolePrints = true
 
 Config.BoardBlips = true
-Config.BoardblipName = 'Auftragsbrett'  --- en = Boat Trader blip name
-Config.PromptName = 'Auftragsbrett'
 Config.CreateBountyTime = 10  -- Create New Bounty Every 60 Min
 Config.MaxBountys = 20
 Config.DistanceSpawnEnemys = 60  --- Enemys Spawn if you are 60 Meters Away or Closer
@@ -65,6 +64,19 @@ Config.MaxHardReward = 100
 ------------------------------- Outlaw Model
 
 Config.Model = 'CS_strawberryoutlaw_02'
+
+------------------------------- Outlaw Guns
+Config.RandomGuns = true
+Config.RandomGun = {
+    {weapon = 'WEAPON_RIFLE_SPRINGFIELD'}, --`weapon_rifle_springfield`
+    {weapon = 'WEAPON_RIFLE_BOLTACTION'}, --`weapon_rifle_boltaction`
+    {weapon = 'WEAPON_SHOTGUN_PUMP'}, --`weapon_shotgun_pump`
+    {weapon = 'WEAPON_RIFLE_CARCANO'}, --`weapon_sniperrifle_carcano`
+    {weapon = 'WEAPON_REVOLVER_DOUBLEACTION'}, --`weapon_revolver_doubleaction`
+    {weapon = 'WEAPON_REPEATER_HENRY'}, --`weapon_repeater_henry`
+    {weapon = 'WEAPON_REPEATER_WINCHESTER'}, --`weapon_repeater_winchester`
+}
+Config.Gun = 'WEAPON_RIFLE_BOLTACTION' --`weapon_rifle_boltaction`
 
 ---------------------------- Mission Settings
 
@@ -731,62 +743,3 @@ Config.HeistMissions = {
 
 }
 
-
------------------------------------------------------------------------------------------------------
-----------------------------------Tanslations--------------------------------------------------------
------------------------------------------------------------------------------------------------------
---DE
-Config.Kill = 'Töte: '
-Config.LabelDiff = ' Schwierigkeit: '
-Config.LabelReward = ' Belohnung: '
-Config.LabelAbort = 'Auftrag Abbrechen'
-Config.BoardHeader = 'Auftragsbrett'
-Config.CloseBoard = 'Auftragsbrett Schließen'
-Config.GetBountyList = 'Aufträge'
-Config.NoBountys = 'Aktuell keine Aufträge komme Später wieder'
-Config.BackBounty = 'Zurück'
-Config.Easy = 'Einfach'
-Config.Middle = 'Mittel'
-Config.Hard = 'Schwer'
-Config.AlreadyHasMission = 'Du hast Bereits ein Auftrag gestartet'
-Config.MissionBlip = 'Missions Gebiet'
-Config.HeistBlip = 'Gebiet des Raubes'
-Config.MissionStartet = 'Mission Gestartet gehe zum Missions Gebiet'
-Config.MissionFailed = 'Mission Fehlgeschlagen'
-Config.MissionSuccess = 'Mission Erfolgreich Abgeschlossen'
-Config.EnemyRemain = 'Verbleibende Gegner: '
-Config.KiledEnemys = 'Gegner Getötet: '
-Config.RewardGet = 'Deine Belohnung ist: '
-Config.NoActiveBounty = 'Keine Mission zum Abbrechen'
-Config.ActiveMissionAborted = 'Aktuelle Mission Abgebrochen'
-Config.StartHeist = 'Starte einen Raub'
-Config.TresorPromptName = 'Tresor'
-Config.PickThatTresor = 'Tresor Knacken'
-Config.MissingLockpick = 'Du hast keinen Dietrich'
-Config.LockpickingSuccess = 'Tresor erfolgreich Aufgebrochen Renn Weg oder Kämpfe'
-Config.LockpickingFailed = 'Tresor Knacken Fehlgeschlagen Probiers nochmal'
-Config.YouAreEscaped = 'Du bist Entkommen'
-Config.HeistRewardGet = 'Raub Erfolgreich du Bekommst: '
-Config.YouKilledAllCops = 'Du hast deine Verfolger getötet Hau ab!'
-Config.YouDied = 'Du bist am Tatort Gestorben mal sehen wer dich zuerst Findet Sheriffs oder deine Freunde'
-Config.NoActiveHeist = 'Kein Aktiven Raub'
-Config.ActiveHeistAborted = 'Aktiven Raub Abgebrochen'
-Config.LabelAbortHeist = 'Raub Abbrechen'
-Config.AlreadyHeistActive = 'Du begehst bereits einen Raub'
-Config.HeistStartetSuccessfully = 'Raub Gestartet schau auf der Karte wo du hin Musst!'
-Config.HeistRewardGetItem = 'Du hast Glück in dem Tresor war Außerdem noch: '
-Config.SheriffAddMission = 'Kopfgeld Aussetzen'
-Config.Firstname = 'Vorname: '
-Config.Lastname = 'Nachname: '
-Config.Reason = 'Grund: '
-Config.Reward = 'Belohnung: '
-Config.AddBounty = 'Kopfgeld Aussetzen'
-Config.SheriffBountySet = 'Kopfgeld Ausgesetzt'
-Config.GetSheriffBountyList = 'Sheriff Aufträge'
-Config.SheriffBountyDelete = 'Kopfgeld Löschen ?'
-Config.SheriffBountyDeleteReally = 'Willst du das  Kopfgeld \n Wirklich Löschen ?'
-Config.Yes = 'Ja'
-Config.No = 'Nein'
-Config.SheriffBountyDelted = 'Kopfgeld Gelöscht'
-Config.HeistActive = 'Ein Raub ist im Gange Stoppe die Täter'
-Config.PoliceHeistBlip = 'Verhindere den Raub'

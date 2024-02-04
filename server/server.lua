@@ -114,7 +114,7 @@ RegisterServerEvent('mms-bounty:server:getbountyfromdb',function()
             end
                 TriggerClientEvent('mms-bounty:client:bountylist', src, eintraege)
         elseif bountycount == 0 then
-            VORPcore.NotifyTip(src, Config.NoBountys, 5000)
+            VORPcore.NotifyTip(src, _U('NoBountys'), 5000)
             TriggerClientEvent('mms-bounty:client:nobounty', src)
         end
     end)
@@ -138,7 +138,7 @@ RegisterServerEvent('mms-bounty:server:reward',function(reward)
     local src = source
     local Character = VORPcore.getUser(src).getUsedCharacter
     Character.addCurrency(0, reward)
-    VORPcore.NotifyTip(src, Config.RewardGet .. reward .. '$',  5000)
+    VORPcore.NotifyTip(src, _U('RewardGet') .. reward .. '$',  5000)
 end)
 
 
@@ -149,7 +149,7 @@ RegisterServerEvent('mms-bounty:server:checklockpick',function(Cops)
             exports.vorp_inventory:subItem(src, Config.LockpickItem, 1)
             TriggerClientEvent('mms-bounty:client:haslockpick',src,Cops)
         else
-            VORPcore.NotifyTip(src, Config.MissingLockpick,  5000)
+            VORPcore.NotifyTip(src, _U('MissingLockpick'),  5000)
         end
 end)
 
@@ -158,7 +158,7 @@ RegisterServerEvent('mms-bounty:server:heistreward',function()
     local src = source
     local Character = VORPcore.getUser(src).getUsedCharacter
     Character.addCurrency(0, heistreward)
-    VORPcore.NotifyTip(src, Config.HeistRewardGet .. heistreward .. '$',  5000)
+    VORPcore.NotifyTip(src, _U('HeistRewardGet') .. heistreward .. '$',  5000)
     Citizen.Wait(3000)
     if Config.LuckyItemsActive == true then
         local randomitemtable = math.random(1,#Config.LuckyItems)
@@ -168,7 +168,7 @@ RegisterServerEvent('mms-bounty:server:heistreward',function()
         local amount = math.random(1,3)
         if chance > 8 then
             exports.vorp_inventory:addItem(src, randomitemname,amount, nil,nil)
-            VORPcore.NotifyTip(src, Config.HeistRewardGetItem .. randomitemname,  5000)
+            VORPcore.NotifyTip(src, _U('HeistRewardGetItem') .. randomitemname,  5000)
         end
     end
 end)
@@ -185,7 +185,7 @@ end)
 RegisterServerEvent('mms-bounty:server:addsheriffbounty',function(inputFirstname,inputLastname,inputReason,inputReward)
     local src = source
     MySQL.insert('INSERT INTO `mms_sheriffbounty` (firstname, lastname, reason, reward) VALUES (?, ?, ?, ?)', {inputFirstname,inputLastname,inputReason,inputReward}, function()end)
-    VORPcore.NotifyTip(src, Config.SheriffBountySet,  5000)
+    VORPcore.NotifyTip(src, _U('SheriffBountySet'),  5000)
 end)
 
 RegisterServerEvent('mms-bounty:server:getsheriffbountyfromdb',function()
@@ -203,7 +203,7 @@ RegisterServerEvent('mms-bounty:server:getsheriffbountyfromdb',function()
             end
                 TriggerClientEvent('mms-bounty:client:sheriffbountylist', src, sheriffeintraege)
         elseif bountycount == 0 then
-            VORPcore.NotifyTip(src, Config.NoBountys, 5000)
+            VORPcore.NotifyTip(src, _U('NoBountys'), 5000)
             TriggerClientEvent('mms-bounty:client:nobounty', src)
         end
     end)
@@ -215,7 +215,7 @@ RegisterServerEvent('mms-bounty:server:deletesheriffbountyfromdb',function(id)
         if result ~= nil then
             MySQL.execute('DELETE FROM mms_sheriffbounty WHERE id = ?', { id }, function()
             end)
-            VORPcore.NotifyTip(src, Config.SheriffBountyDelted,  5000)
+            VORPcore.NotifyTip(src, _U('SheriffBountyDelted'),  5000)
         else
             VORPcore.NotifyTip(src, 'Error This Id not in Database ( Database Error Contact Support)!',  5000)
         end
@@ -231,7 +231,7 @@ for _, player in ipairs(GetPlayers()) do
         for y, e in pairs(Config.Jobs) do
             if userjob == e.JobName then
                 TriggerClientEvent('mms-bounty:client:alertpolice',player,Tresor)
-                VORPcore.NotifyTip(player, Config.HeistActive, 10000)
+                VORPcore.NotifyTip(player, _U('HeistActive'), 10000)
             end
         end
 end
@@ -244,7 +244,6 @@ RegisterServerEvent('mms-bounty:server:removeblip',function()
             for y, e in pairs(Config.Jobs) do
                 if userjob == e.JobName then
                     TriggerClientEvent('mms-bounty:client:removeblip',player)
-                    --VORPcore.NotifyTip(source, Config.HeistActive, 10000)
                 end
             end
     end
