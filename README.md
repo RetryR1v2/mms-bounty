@@ -48,6 +48,8 @@
 - Fixed Database Bug Thanks for Reporting
 - 1.2.1
 - Fixed Translation Bug thanks for Reporting
+- 1.2.2
+- Added Gps Route to Easy Find Location
 
 # installation 
 

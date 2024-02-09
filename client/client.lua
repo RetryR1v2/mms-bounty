@@ -592,6 +592,14 @@ end)
 
 function CheckDistance(selected,reward)--blip:Remove()
     AreaBlip = BccUtils.Blips:SetBlip(_U('MissionBlip'), 'blip_ambient_hunter', 0.2, selected[1].x,selected[1].y,selected[1].z)
+    --GPSCoordsBounty = {selected[1].x,selected[1].y,selected[1].z}
+    x = selected[1].x
+    y = selected[1].y
+    z= selected[1].z
+    StartGpsMultiRoute(GetHashKey("COLOR_RED"), true, true)
+    AddPointToGpsMultiRoute(x,y,z)
+    SetGpsMultiRouteRender(true)
+    GPSActiveBounty = true
     local notnear = true
     while notnear == true and MissionActive == true do
         Citizen.Wait(250)
@@ -599,6 +607,10 @@ function CheckDistance(selected,reward)--blip:Remove()
         dist = #(playerCoords - selected[1])
     if dist < Config.DistanceSpawnEnemys then
         notnear = false
+        if GPSActiveBounty == true then
+            ClearGpsMultiRoute(x,y,z)
+            GPSActiveBounty = false
+        end
         SpawnEnemys(selected,reward)
     end
 
@@ -745,6 +757,11 @@ function CheckDistanceToHeist(selected)
     local Cops = selected.Cops
     local TresorHeading = selected.TresorHeading
     HeistBlip = BccUtils.Blips:SetBlip(_U('HeistBlip'), 'blip_mp_job_exclusive_large', 0.2, Tresor.x,Tresor.y,Tresor.z)
+    GPSCoordsOutlaw = Tresor
+    StartGpsMultiRoute(GetHashKey("COLOR_RED"), true, true)
+    AddPointToGpsMultiRoute(GPSCoordsOutlaw)
+    SetGpsMultiRouteRender(true)
+    GPSActiveHeist = true
     local notnear = true
     while notnear == true and HeistActive == true do
         Citizen.Wait(250)
@@ -754,6 +771,7 @@ function CheckDistanceToHeist(selected)
         notnear = false
         if Config.HeistAlerts == true then
         TriggerServerEvent('mms-bounty:server:alertpolice',Tresor)
+        VORPcore.NotifyTip(_U('SheriffAlerted'), 5000)
         end
         TriggerEvent('mms-bounty:client:heisttresor',Tresor,Cops,TresorHeading)
         --SpawnEnemys(Tresor,Cops)
@@ -763,8 +781,13 @@ end
 
 RegisterNetEvent('mms-bounty:client:alertpolice')
 AddEventHandler('mms-bounty:client:alertpolice',function(Tresor)
-    PoliceHeistBlip = BccUtils.Blips:SetBlip(_U('PoliceHeistBlip'), 'blip_special_series_1', 0.2, Tresor.x,Tresor.y,Tresor.z)
+    PoliceHeistBlip = BccUtils.Blips:SetBlip(_U('PoliceHeistBlip'), 'blip_honor_bad', 5.0, Tresor.x,Tresor.y,Tresor.z)
     PoliceHeistBlipCreated = true
+    GPSCoords = Tresor
+    StartGpsMultiRoute(GetHashKey("COLOR_RED"), true, true)
+    AddPointToGpsMultiRoute(GPSCoords)
+    SetGpsMultiRouteRender(true)
+    PoliceGPS  = true
 end)
 
 RegisterNetEvent('mms-bounty:client:heisttresor')
@@ -919,6 +942,10 @@ function ResetHeist()
     if spawnedtresor == true then
     tresorprompt:DeletePrompt()
     end
+    if GPSActiveHeist == true then
+        ClearGpsMultiRoute(GPSCoordsOutlaw)
+        GPSActiveHeist = false
+    end
     DeleteObject(createdtresor)
 	CreatedCops = {}
     
@@ -933,5 +960,9 @@ AddEventHandler('mms-bounty:client:removeblip',function ()
     if Config.HeistAlerts == true and PoliceHeistBlipCreated == true then
         PoliceHeistBlip:Remove()
         PoliceHeistBlipCreated = false
+    end
+    if PoliceGPS == true then
+        ClearGpsMultiRoute(GPSCoords)
+        PoliceGPS = false
     end
 end)

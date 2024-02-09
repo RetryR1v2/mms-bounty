@@ -13,7 +13,7 @@ Config.Jobs= {
         JobName = 'police',
     },
     {
-        JobName = 'sheriff',
+        JobName = 'sheriffval',
     },
     {
         JobName = 'marshall',

@@ -52,4 +52,5 @@ No = 'Nein',
 SheriffBountyDelted = 'Kopfgeld Gelöscht',
 HeistActive = 'Ein Raub ist im Gange Stoppe die Täter',
 PoliceHeistBlip = 'Verhindere den Raub',
+SheriffAlerted = 'Sheriffs Wurden Alamiert!',
 }

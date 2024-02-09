@@ -52,4 +52,5 @@ No = 'No',
 SheriffBountyDelted = 'Bounty Deleted',
 HeistActive = 'A heist is in progress, stop the criminals',
 PoliceHeistBlip = 'Prevent the heist',
+SheriffAlerted = 'Sheriffs Alerted!',
 }
