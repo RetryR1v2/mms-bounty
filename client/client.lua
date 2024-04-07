@@ -112,7 +112,7 @@ AddEventHandler('mms-bounty:client:registermenu',function()
         ['720width'] = '500px',
         ['1080width'] = '700px',
         ['2kwidth'] = '700px',
-        ['4kwidth'] = '8000px',
+        ['4kwidth'] = '800px',
         style = {
             ['border'] = '5px solid orange',
             -- ['background-image'] = 'none',
@@ -125,7 +125,18 @@ AddEventHandler('mms-bounty:client:registermenu',function()
             }
         },
         draggable = true,
-    })
+    --canclose = false
+}, {
+    opened = function()
+        --print("MENU OPENED!")
+    end,
+    closed = function()
+        --print("MENU CLOSED!")
+    end,
+    topage = function(data)
+        --print("PAGE CHANGED ", data.pageid)
+    end
+})
     BountyBoardPage1 = BountyBoard:RegisterPage('seite1')
     BountyBoardPage1:RegisterElement('header', {
         value = _U('BoardHeader'),
@@ -654,11 +665,11 @@ function SpawnEnemys(selected,reward)
 	end
     end
     SetModelAsNoLongerNeeded(modelHash)
-    CheckifDead(reward)
+    CheckifDead(reward,selected)
 end
 
 
-function CheckifDead(reward)
+function CheckifDead(reward,selected)
     
     local chekifdead = 1
     local player = PlayerPedId()
@@ -666,9 +677,14 @@ function CheckifDead(reward)
         Citizen.Wait(250)
         local numberOfAlivePeds = GetNumberOfAlive()
         local numberofDeadPeds = GetNumberOfDead()
-        
+        local playerCoords = GetEntityCoords(PlayerPedId())
+        dist = #(playerCoords - selected[1])
         VORPcore.NotifyTip(_U('EnemyRemain') .. numberOfAlivePeds, 5000)
         if IsEntityDead(player) then
+            VORPcore.NotifyTip(_U('MissionFailed'), 5000)
+            chekifdead = 0
+            Reset()
+        elseif dist > Config.AbortDistance then
             VORPcore.NotifyTip(_U('MissionFailed'), 5000)
             chekifdead = 0
             Reset()
@@ -767,7 +783,7 @@ function CheckDistanceToHeist(selected)
         Citizen.Wait(250)
     local playerCoords = GetEntityCoords(PlayerPedId())
         dist = #(playerCoords - Tresor)
-    if dist < 30 then
+    if dist < 100 then
         notnear = false
         if Config.HeistAlerts == true then
         TriggerServerEvent('mms-bounty:server:alertpolice',Tresor)
