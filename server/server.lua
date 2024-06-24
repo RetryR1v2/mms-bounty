@@ -151,8 +151,8 @@ RegisterServerEvent('mms-bounty:server:rewardsheriffmission',function(reward,pla
         local BalanceColumn = Config.BalanceColumn
         local JobColumn = Config.JobColumn
         local Job = playerjob
-        local result = MySQL.query.await("SELECT "..BalanceColumn.." FROM ".. Database .. " WHERE "..JobColumn.."=@"..Job, { [Job] = Job})
-        local newbalance = result[1].balance + reward   <--------- HERE AFTER THE result[1].YOURCOLUMNHERE
+        local result = MySQL.query.await("SELECT "..BalanceColumn.." FROM ".. Database .. " WHERE "..JobColumn.."=?", {Job})
+        local newbalance = result[1][Config.BalanceColumn] + reward
         MySQL.update("UPDATE ".. Database .. " SET "..BalanceColumn.." = ? WHERE "..JobColumn.." = ?",{newbalance, Job})
         VORPcore.NotifyTip(src, _U('RewardGetSheriffMission') .. reward .. '$',  5000)
     else

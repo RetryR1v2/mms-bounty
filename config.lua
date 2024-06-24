@@ -985,10 +985,8 @@ Config.UseSheriffLedger = true
 -- DL Society Ready
 Config.JobColumn = 'name'
 Config.Database = 'dl_jobs'
-Config.BalanceColumn = 'balance'   -- <--- If you Got Another Society then DL_Society then you need to Edit your server.lua Line 155 too
--- In Some Society Systems its Called Ledger or jobledger its needs to be the column of the Money.
-
-
+Config.BalanceColumn = 'balance'
+-- If you Use another society you need to Update these
 
 Config.SheriffMissions = {
     { ---- Fort Wallace 
