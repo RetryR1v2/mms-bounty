@@ -8,7 +8,7 @@ local MissionActive = false
 local dist = nil
 local CreatedOutlaws = {}
 
-
+local SheriffMission = false
 
 local HeistActive = false
 local spawnedtresor = false
@@ -69,7 +69,7 @@ local lockpicksettings = {
 
 Citizen.CreateThread(function()
 local BountyBoardPrompt = BccUtils.Prompts:SetupPromptGroup()
-    local traderprompt = BountyBoardPrompt:RegisterPrompt(_U('PromptName'), 0x760A9C6F, 1, 1, true, 'hold', {timedeventhash = 'MEDIUM_TIMED_EVENT'})
+    local boardprompt = BountyBoardPrompt:RegisterPrompt(_U('PromptName'), 0x760A9C6F, 1, 1, true, 'hold', {timedeventhash = 'MEDIUM_TIMED_EVENT'})
     if Config.BoardBlips then
         for h,v in pairs(Config.BountyBoards) do
         local blip = BccUtils.Blips:SetBlip(_U('BoardblipName'), 'blip_ambient_bounty_hunter', 0.2, v.coords.x,v.coords.y,v.coords.z)
@@ -84,13 +84,38 @@ local BountyBoardPrompt = BccUtils.Prompts:SetupPromptGroup()
         if dist < 2 then
             BountyBoardPrompt:ShowGroup(_U('PromptName'))
 
-            if traderprompt:HasCompleted() then
+            if boardprompt:HasCompleted() then
                 TriggerEvent('mms-bounty:client:openboard') break
             end
         end
     end
     end
 end)
+
+Citizen.CreateThread(function()
+    local HeistBoardPrompt = BccUtils.Prompts:SetupPromptGroup()
+        local heistboardprompt = HeistBoardPrompt:RegisterPrompt(_U('HeistPromptName'), 0x760A9C6F, 1, 1, true, 'hold', {timedeventhash = 'MEDIUM_TIMED_EVENT'})
+        if Config.HeistBoardBlips then
+            for h,v in pairs(Config.HeistBoards) do
+            local heistboardblip = BccUtils.Blips:SetBlip(_U('HeistBoardblipName'), 'blip_ambient_bounty_hunter', 0.2, v.coords.x,v.coords.y,v.coords.z)
+            end
+        end
+        
+        while true do
+            Wait(1)
+            for h,v in pairs(Config.HeistBoards) do
+            local playerCoords = GetEntityCoords(PlayerPedId())
+            local dist = #(playerCoords - v.coords)
+            if dist < 2 then
+                HeistBoardPrompt:ShowGroup(_U('HeistPromptName'))
+    
+                if heistboardprompt:HasCompleted() then
+                    TriggerEvent('mms-bounty:client:openheistboard') break
+                end
+            end
+        end
+        end
+    end)
 
 RegisterNetEvent('mms-bounty:client:openboard')
 AddEventHandler('mms-bounty:client:openboard',function()
@@ -99,6 +124,113 @@ AddEventHandler('mms-bounty:client:openboard',function()
     })
 end)
 
+RegisterNetEvent('mms-bounty:client:openheistboard')
+AddEventHandler('mms-bounty:client:openheistboard',function()
+    HeistBoard:Open({
+        startupPage = HeistBoardPage1,
+    })
+end)
+
+
+---------------------------------------------------------------------------------------------------------
+-------------------------------------------- Heist Menu--------------------------------------------------
+---------------------------------------------------------------------------------------------------------
+
+Citizen.CreateThread(function ()
+    if Config.HeistMissionsActive == true then
+    HeistBoard = FeatherMenu:RegisterMenu('feather:character:heistboardmenu', {
+        top = '20%',
+        left = '20%',
+        ['720width'] = '500px',
+        ['1080width'] = '700px',
+        ['2kwidth'] = '700px',
+        ['4kwidth'] = '800px',
+        style = {
+            ['border'] = '5px solid orange',
+            -- ['background-image'] = 'none',
+            ['background-color'] = '#FF8C00'
+        },
+        contentslot = {
+            style = {
+                ['height'] = '550px',
+                ['min-height'] = '250px'
+            }
+        },
+        draggable = true,
+    --canclose = false
+}, {
+    opened = function()
+        --print("MENU OPENED!")
+    end,
+    closed = function()
+        --print("MENU CLOSED!")
+    end,
+    topage = function(data)
+        --print("PAGE CHANGED ", data.pageid)
+    end
+})
+    HeistBoardPage1 = HeistBoard:RegisterPage('seite1')
+    HeistBoardPage1:RegisterElement('header', {
+        value = _U('HeistBoardHeader'),
+        slot = 'header',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+    HeistBoardPage1:RegisterElement('line', {
+        slot = 'header',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+    HeistBoardPage1:RegisterElement('button', {
+        label =  _U('StartHeist'),
+        style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px'
+        },
+    }, function()
+        TriggerEvent('mms-bounty:client:startheist')
+        HeistBoard:Close({ 
+        })
+    end)
+    HeistBoardPage1:RegisterElement('button', {
+        label =  _U('LabelAbortHeist'),
+        style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px'
+        },
+    }, function()
+        TriggerEvent('mms-bounty:client:abortheist')
+    end)
+    HeistBoardPage1:RegisterElement('button', {
+        label =  _U('CloseBoard'),
+        style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px'
+        },
+    }, function()
+        HeistBoard:Close({ 
+        })
+    end)
+    HeistBoardPage1:RegisterElement('subheader', {
+        value = _U('HeistBoardHeader'),
+        slot = 'footer',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+    HeistBoardPage1:RegisterElement('line', {
+        slot = 'footer',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+end
+end)
 
 ---------------------------------------------------------------------------------------------------------
 --------------------------------------- SEITE 1 Hauptmenü------------------------------------------------
@@ -107,8 +239,8 @@ end)
 RegisterNetEvent('mms-bounty:client:registermenu')
 AddEventHandler('mms-bounty:client:registermenu',function()
     BountyBoard = FeatherMenu:RegisterMenu('feather:character:bountyboardmenu', {
-        top = '50%',
-        left = '50%',
+        top = '20%',
+        left = '20%',
         ['720width'] = '500px',
         ['1080width'] = '700px',
         ['2kwidth'] = '700px',
@@ -168,20 +300,6 @@ AddEventHandler('mms-bounty:client:registermenu',function()
         
         end
     end)
-    if Config.HeistMissionsActive == true then
-    BountyBoardPage1:RegisterElement('button', {
-        label =  _U('StartHeist'),
-        style = {
-        ['background-color'] = '#FF8C00',
-        ['color'] = 'orange',
-        ['border-radius'] = '6px'
-        },
-    }, function()
-        TriggerEvent('mms-bounty:client:startheist')
-        BountyBoard:Close({ 
-        })
-    end)
-    end
     BountyBoardPage1:RegisterElement('button', {
         label = _U('GetSheriffBountyList'),
         style = {
@@ -200,6 +318,18 @@ AddEventHandler('mms-bounty:client:registermenu',function()
     end)
     for y, e in pairs(Config.Jobs) do
         if playerjob == e.JobName then
+            BountyBoardPage1:RegisterElement('button', {
+                label =  _U('StartSheriffMission'),
+                style = {
+                ['background-color'] = '#FF8C00',
+                ['color'] = 'orange',
+                ['border-radius'] = '6px'
+                },
+            }, function()
+                TriggerEvent('mms-bounty:client:startsheriffbounty')
+                BountyBoard:Close({ 
+                })
+            end)
             BountyBoardPage1:RegisterElement('button', {
                 label =  _U('SheriffAddMission'),
                 style = {
@@ -222,18 +352,6 @@ AddEventHandler('mms-bounty:client:registermenu',function()
     }, function()
         TriggerEvent('mms-bounty:client:abortbounty')
     end)
-    if Config.HeistMissionsActive == true then
-    BountyBoardPage1:RegisterElement('button', {
-        label =  _U('LabelAbortHeist'),
-        style = {
-        ['background-color'] = '#FF8C00',
-        ['color'] = 'orange',
-        ['border-radius'] = '6px'
-        },
-    }, function()
-        TriggerEvent('mms-bounty:client:abortheist')
-    end)
-    end
     BountyBoardPage1:RegisterElement('button', {
         label =  _U('CloseBoard'),
         style = {
@@ -572,6 +690,20 @@ AddEventHandler('mms-bounty:client:abortbounty',function()
     end
 end)
 
+RegisterNetEvent('mms-bounty:client:startsheriffbounty')
+AddEventHandler('mms-bounty:client:startsheriffbounty',function()
+    if MissionActive == false then
+        local randommission = math.random(1,#Config.SheriffMissions)
+        local selected = Config.SheriffMissions[randommission]
+        local reward = math.random(Config.SheriffRewardMin,Config.SheriffRewardMax)
+        SheriffMission = true
+        MissionActive = true
+        VORPcore.NotifyTip(_U('MissionStartet'), 5000)
+        CheckDistance(selected,reward)
+    else
+        VORPcore.NotifyTip(_U('AlreadyHasMission'), 5000)
+    end
+end)
 
 RegisterNetEvent('mms-bounty:client:startbounty')
 AddEventHandler('mms-bounty:client:startbounty',function(id,difficulty,name,reward)
@@ -693,7 +825,11 @@ function CheckifDead(reward,selected)
             VORPcore.NotifyTip(_U('KilledEnemys') .. numberofDeadPeds , 5000)
             chekifdead = 0
             Reset()
-            TriggerServerEvent('mms-bounty:server:reward',reward)
+            if SheriffMission then 
+                TriggerServerEvent('mms-bounty:server:rewardsheriffmission',reward,playerjob)
+            elseif not SheriffMission then
+                TriggerServerEvent('mms-bounty:server:reward',reward)
+            end 
         end
 	end
 
@@ -734,6 +870,10 @@ function Reset()
             Citizen.Wait(250)
 		end
 	end
+    if GPSActiveBounty == true then
+        ClearGpsMultiRoute(x,y,z)
+        GPSActiveBounty = false
+    end
     AreaBlip:Remove()
 	CreatedOutlaws = {}
     MissionActive = false

@@ -55,4 +55,10 @@ HeistActive = 'A heist is in progress, stop the criminals',
 PoliceHeistBlip = 'Prevent the heist',
 SheriffAlerted = 'Sheriffs Alerted!',
 TooFarAway = 'Du bist zu Weit Entfernt Mission Fehlgeschlagen',
+--New
+HeistBoardblipName = 'Heists',
+HeistPromptName = 'Heists',
+HeistBoardHeader = 'Heists',
+StartSheriffMission = 'Sheriff Missions',
+RewardGetSheriffMission = 'The Reward was Added to Job Ledger. The Reward is: ',
 }

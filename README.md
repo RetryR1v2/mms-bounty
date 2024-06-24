@@ -52,6 +52,10 @@
 - Added Gps Route to Easy Find Location
 - 1.2.3 
 - Added Distance the Bounty will Abort at if you run too far away
+- 1.2.4 
+- Added Sheriff Missions 
+- Added Feature to Add Sheriff Mission Rewards to the Databse of your Society. ( Beta Testing ) Can be Disabled to False
+- Seperated Heist Board and Bounty Board
 
 # installation 
 

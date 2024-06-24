@@ -55,4 +55,10 @@ HeistActive = 'Ein Raub ist im Gange Stoppe die Täter',
 PoliceHeistBlip = 'Verhindere den Raub',
 SheriffAlerted = 'Sheriffs Wurden Alamiert!',
 TooFarAway = 'Du bist zu Weit Entfernt Mission Fehlgeschlagen',
+--New
+HeistBoardblipName = 'Überfälle',
+HeistPromptName = 'Überfälle',
+HeistBoardHeader = 'Überfälle',
+StartSheriffMission = 'Sheriff Missionen',
+RewardGetSheriffMission = 'Die Belohnung wurde dem Sheriff Konto hinzugefügt. Die Belohnung ist: ',
 }

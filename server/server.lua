@@ -143,6 +143,24 @@ RegisterServerEvent('mms-bounty:server:reward',function(reward)
     VORPcore.NotifyTip(src, _U('RewardGet') .. reward .. '$',  5000)
 end)
 
+RegisterServerEvent('mms-bounty:server:rewardsheriffmission',function(reward,playerjob)
+    local src = source
+    local Character = VORPcore.getUser(src).getUsedCharacter
+    if Config.UseSheriffLedger then
+        local Database = Config.Database
+        local BalanceColumn = Config.BalanceColumn
+        local JobColumn = Config.JobColumn
+        local Job = playerjob
+        local result = MySQL.query.await("SELECT "..BalanceColumn.." FROM ".. Database .. " WHERE "..JobColumn.."=@"..Job, { [Job] = Job})
+        local newbalance = result[1].balance + reward   <--------- HERE AFTER THE result[1].YOURCOLUMNHERE
+        MySQL.update("UPDATE ".. Database .. " SET "..BalanceColumn.." = ? WHERE "..JobColumn.." = ?",{newbalance, Job})
+        VORPcore.NotifyTip(src, _U('RewardGetSheriffMission') .. reward .. '$',  5000)
+    else
+        Character.addCurrency(0, reward)
+        VORPcore.NotifyTip(src, _U('RewardGet') .. reward .. '$',  5000)
+    end
+end)
+
 
 RegisterServerEvent('mms-bounty:server:checklockpick',function(Cops)
     local src = source
