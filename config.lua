@@ -1,6 +1,6 @@
 Config = {}
 
-Config.defaultlang = "de_lang" -- Set Language (Current Languages: "en_lang" English, "de_lang" German)
+Config.defaultlang = "de_lang" -- Set Language (Current Languages: "en_lang" English, "de_lang" German, "ro_lang" Romanian)
 Config.ServerConsolePrints = true
 
 Config.BoardBlips = true
