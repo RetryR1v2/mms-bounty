@@ -56,6 +56,12 @@
 - Added Sheriff Missions 
 - Added Feature to Add Sheriff Mission Rewards to the Databse of your Society. ( Beta Testing ) Can be Disabled to False
 - Seperated Heist Board and Bounty Board
+- 1.2.5
+- Added Cooldown for Heists
+- Added Progressbar in Lockpick
+- Fixed Lockpick Randomizer
+- If you Run Aways you dont Get Reward now It was too Easy if you Always Run Away.
+
 
 # installation 
 

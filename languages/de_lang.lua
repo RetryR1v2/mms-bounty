@@ -61,4 +61,5 @@ HeistPromptName = 'Überfälle',
 HeistBoardHeader = 'Überfälle',
 StartSheriffMission = 'Sheriff Missionen',
 RewardGetSheriffMission = 'Die Belohnung wurde dem Sheriff Konto hinzugefügt. Die Belohnung ist: ',
+HeistInCooldown = 'Es ist bereits ein Raub im Gange Versuche es Später nochmal.',
 }

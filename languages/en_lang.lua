@@ -61,4 +61,5 @@ HeistPromptName = 'Heists',
 HeistBoardHeader = 'Heists',
 StartSheriffMission = 'Sheriff Missions',
 RewardGetSheriffMission = 'The Reward was Added to Job Ledger. The Reward is: ',
+HeistInCooldown = 'There was Already a Heist Startet or is Running Try Again Later',
 }

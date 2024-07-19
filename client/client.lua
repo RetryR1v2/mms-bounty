@@ -2,6 +2,7 @@ local VORPcore = exports.vorp_core:GetCore()
 local BccUtils = exports['bcc-utils'].initiate()
 local FeatherMenu =  exports['feather-menu'].initiate()
 local MiniGame = exports['bcc-minigames'].initiate()
+local progressbar = exports.vorp_progressbar:initiate()
 
 local getbounty = 0
 local MissionActive = false
@@ -14,9 +15,9 @@ local HeistActive = false
 local spawnedtresor = false
 local CreatedCops = {}
 
-local deg1 = 0
-local deg2 = 0
-local deg3 = 0
+local deg1 = math.random(1,360)
+local deg2 = math.random(1,360)
+local deg3 = math.random(1,360)
 
 
 local playerjob = nil
@@ -44,6 +45,8 @@ end)
 ---------------------------------------------------------------------------------
 ----------------------------Minigame Settings------------------------------------
 ---------------------------------------------------------------------------------
+
+
 local lockpicksettings = {
     focus = true, -- Should minigame take nui focus
     cursor = true, -- Should minigame have cursor  (required for lockpick)
@@ -191,7 +194,7 @@ Citizen.CreateThread(function ()
         ['border-radius'] = '6px'
         },
     }, function()
-        TriggerEvent('mms-bounty:client:startheist')
+        TriggerEvent('mms-bounty:client:startheist1')
         HeistBoard:Close({ 
         })
     end)
@@ -894,9 +897,15 @@ AddEventHandler('mms-bounty:client:abortheist',function()
     end
 end)
 
-RegisterNetEvent('mms-bounty:client:startheist')
-AddEventHandler('mms-bounty:client:startheist',function()
+RegisterNetEvent('mms-bounty:client:startheist1')
+AddEventHandler('mms-bounty:client:startheist1',function()
+    TriggerServerEvent('mms-bounty:server:CheckifheistActive')
+end)
+
+RegisterNetEvent('mms-bounty:client:startheist2')
+AddEventHandler('mms-bounty:client:startheist2',function()
     if HeistActive == false then
+        TriggerServerEvent('mms-bounty:server:startheistwebhook')
         VORPcore.NotifyTip(_U('HeistStartetSuccessfully'), 5000)
         HeistActive = true
         local randomheist = math.random(1,#Config.HeistMissions)
@@ -923,7 +932,7 @@ function CheckDistanceToHeist(selected)
         Citizen.Wait(250)
     local playerCoords = GetEntityCoords(PlayerPedId())
         dist = #(playerCoords - Tresor)
-    if dist < 100 then
+    if dist < 150 then
         notnear = false
         if Config.HeistAlerts == true then
         TriggerServerEvent('mms-bounty:server:alertpolice',Tresor)
@@ -940,9 +949,24 @@ AddEventHandler('mms-bounty:client:alertpolice',function(Tresor)
     PoliceHeistBlip = BccUtils.Blips:SetBlip(_U('PoliceHeistBlip'), 'blip_honor_bad', 5.0, Tresor.x,Tresor.y,Tresor.z)
     PoliceHeistBlipCreated = true
     GPSCoords = Tresor
+    local is_frontend_sound_playing = false
+    local frontend_soundset_ref = "Player_Core_Empty_Sounds"
+    local frontend_soundset_name =  "DEADEYE"
+    if not is_frontend_sound_playing then
+        if frontend_soundset_ref ~= 0 then
+          Citizen.InvokeNative(0x0F2A2175734926D8,frontend_soundset_name, frontend_soundset_ref);   -- load sound frontend
+        end
+        Citizen.InvokeNative(0x67C540AA08E4A6F5,frontend_soundset_name, frontend_soundset_ref, true, 0);  -- play sound frontend
+        is_frontend_sound_playing = true
+    end
     StartGpsMultiRoute(GetHashKey("COLOR_RED"), true, true)
     AddPointToGpsMultiRoute(GPSCoords)
     SetGpsMultiRouteRender(true)
+    Citizen.Wait(3000)
+        if is_frontend_sound_playing then
+            Citizen.InvokeNative(0x9D746964E0CF2C5F,frontend_soundset_name, frontend_soundset_ref)  -- stop audio
+            is_frontend_sound_playing = false
+        end
     PoliceGPS  = true
 end)
 
@@ -984,19 +1008,20 @@ end)
 
 RegisterNetEvent('mms-bounty:client:haslockpick')
 AddEventHandler('mms-bounty:client:haslockpick',function(Cops)
-    deg1 = math.random(1,360)
-    deg2 = math.random(1,360)
-    deg3 = math.random(1,360)
+    Citizen.Wait(1000)
     MiniGame.Start('lockpick', lockpicksettings, function(result)
         if result.unlocked == true then
             VORPcore.NotifyTip(_U('LockpickingSuccess'), 5000)
             Citizen.Wait(3000)
-            TriggerServerEvent('mms-bounty:server:heistreward')
-            if Config.HeistNpcs == true then
-                SpawnCops(Cops)
-            elseif Config.HeistNpcs == false then
-                ResetHeist()
-            end
+                if Config.HeistNpcs == true then
+                    progressbar.start('Tresor wird Geknackt!', 5000, function ()
+                    end, 'linear')
+                    SpawnCops(Cops)
+                elseif Config.HeistNpcs == false then
+                    progressbar.start('Tresor wird Geknackt!', 5000, function ()
+                    end, 'linear')
+                    ResetHeist()
+                end
         else
             VORPcore.NotifyTip(_U('LockpickingFailed'), 5000)
         end
@@ -1023,7 +1048,6 @@ function SpawnCops(Cops)
 		SetEntityAsMissionEntity(copped, true, true)
 		Citizen.InvokeNative(0x740CB4F3F602C9F4, copped, true)
 		CreatedCops[#CreatedCops + 1] = copped
-		
 	end
     end
     SetModelAsNoLongerNeeded(modelHash)
@@ -1048,6 +1072,7 @@ function CheckifDeadOrEscaped()
             chekifdead = 0
         elseif numberOfAlivePeds == 0 then
             VORPcore.NotifyTip(_U('YouKilledAllCops'), 5000)
+            TriggerServerEvent('mms-bounty:server:heistreward')
             ResetHeist()
             chekifdead = 0
         elseif escapedistance > 300 then

@@ -31,13 +31,26 @@ Config.BountyBoards = {
     {coords = vector3(-272.43, 804.47, 119.34)},   --- Also the Location of Blip and Npc (Valentine) 
     {coords = vector3(1353.66, -1304.22, 76.86)},   --- Also the Location of Blip and Npc (Rhodes)
     {coords = vector3(1353.66, -1304.22, 76.86)},   --- Also the Location of Blip and Npc (SaintDenise)},
+    {coords = vector3(2512.96, -1305.06, 49.0)},
 }
 
 Config.HeistBoardBlips = true
+Config.HeistEnableWebHook = true
+
+Config.WHTitle = 'BountyBoard:'
+Config.WHLink = ''  -- Discord WH link Here
+Config.WHColor = 16711680 -- red
+Config.WHName = 'BountyBoard:' -- name
+Config.WHLogo = '' -- must be 30x30px
+Config.WHFooterLogo = '' -- must be 30x30px
+Config.WHAvatar = '' -- must be 30x30px
 
 Config.HeistBoards = {
-    {coords = vector3(-1445.85, -2309.22, 44.56)},   --- Also the Location of Blip (Blackwater)  
+    {coords = vector3(-1445.85, -2309.22, 44.56)},   --- Also the Location of Blip (Thieves Landing)  
+    {coords = vector3(2857.22, -1199.14, 45.66)},   --- Also the Location of Blip (Saint Denise) 
 }
+
+Config.HeistCooldown = 1 -- Time in Min
 
 Config.Names = {  --- This will be the Target name in Bountyboard Name will pciked random out of this names list
     {name = 'Harry Dalton'},

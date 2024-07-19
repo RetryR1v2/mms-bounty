@@ -5,6 +5,9 @@ local reward = nil
 local bountycount = nil
 local sheriffbountycount = nil
 local userjob = nil
+local heistactive = false
+local heistcooldown = Config.HeistCooldown * 60
+
 -----------------------------------------------------------------------
 -- version checker
 -----------------------------------------------------------------------
@@ -268,6 +271,45 @@ RegisterServerEvent('mms-bounty:server:removeblip',function()
             end
     end
 
+end)
+
+----- HEIST COOLDOWN ----
+
+RegisterServerEvent('mms-bounty:server:CheckifheistActive',function()
+    local src = source
+    if not heistactive then
+        heistactive = true
+        TriggerClientEvent('mms-bounty:client:startheist2',src)
+    else
+        VORPcore.NotifyTip(src, _U('HeistInCooldown'), 5000)
+    end
+end)
+
+
+Citizen.CreateThread(function ()
+    while true do
+        Wait(1000)
+        if heistactive then
+            local cooldown = 0
+            while cooldown <= heistcooldown do
+                Wait(1000)
+                cooldown = cooldown + 1
+            end
+            heistactive = false
+        end
+    end
+end)
+
+
+-------WEBHOOK-----
+RegisterServerEvent('mms-bounty:server:startheistwebhook',function ()
+    local src = source
+    local Character = VORPcore.getUser(src).getUsedCharacter
+    local Firstname = Character.firstname
+    local Lastname = Character.lastname
+    if Config.HeistEnableWebHook then
+        VORPcore.AddWebhook(Config.WHTitle, Config.WHLink, Firstname .. ' ' .. Lastname .. ' Startet a Heist', Config.WHColor, Config.WHName, Config.WHLogo, Config.WHFooterLogo, Config.WHAvatar)
+    end
 end)
 
 --------------------------------------------------------------------------------------------------
