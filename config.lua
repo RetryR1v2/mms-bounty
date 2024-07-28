@@ -1,8 +1,9 @@
 Config = {}
 
-Config.defaultlang = "de_lang" -- Set Language (Current Languages: "en_lang" English, "de_lang" German, "ro_lang" Romanian)
+Config.defaultlang = "de_lang" -- Set Language (Current Languages: "en_lang" English, "de_lang" German)
 Config.ServerConsolePrints = true
 
+Config.AbortBountyTimer = 600  -- Time In Secounds after Abort when to Start Again
 Config.BoardBlips = true
 Config.CreateBountyTime = 10  -- Create New Bounty Every 60 Min
 Config.MaxBountys = 20
@@ -50,7 +51,7 @@ Config.HeistBoards = {
     {coords = vector3(2857.22, -1199.14, 45.66)},   --- Also the Location of Blip (Saint Denise) 
 }
 
-Config.HeistCooldown = 1 -- Time in Min
+Config.HeistCooldown = 20 -- Time in Min
 
 Config.Names = {  --- This will be the Target name in Bountyboard Name will pciked random out of this names list
     {name = 'Harry Dalton'},

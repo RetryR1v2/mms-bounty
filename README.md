@@ -61,6 +61,9 @@
 - Added Progressbar in Lockpick
 - Fixed Lockpick Randomizer
 - If you Run Aways you dont Get Reward now It was too Easy if you Always Run Away.
+- 1.2.6
+- Abort Bounty Timer If you abourt a Bounty you need to Wait now till the TImer is Over. ( SPAM PROTECTION )
+- Fixed Blinking Tresor Bug for Some PPL.
 
 
 # installation 

@@ -55,11 +55,13 @@ HeistActive = 'Ein Raub ist im Gange Stoppe die Täter',
 PoliceHeistBlip = 'Verhindere den Raub',
 SheriffAlerted = 'Sheriffs Wurden Alamiert!',
 TooFarAway = 'Du bist zu Weit Entfernt Mission Fehlgeschlagen',
---New
 HeistBoardblipName = 'Überfälle',
 HeistPromptName = 'Überfälle',
 HeistBoardHeader = 'Überfälle',
 StartSheriffMission = 'Sheriff Missionen',
 RewardGetSheriffMission = 'Die Belohnung wurde dem Sheriff Konto hinzugefügt. Die Belohnung ist: ',
 HeistInCooldown = 'Es ist bereits ein Raub im Gange Versuche es Später nochmal.',
+--NEW
+CanDoBountyAgain = 'Du kannst nun Wieder Aufträge machen.',
+AbortedBountyNeedToWaitSec = 'Du hast vor kurzem einen Auftrag Abgebrochen Warte Bitte: Sekunden ',
 }

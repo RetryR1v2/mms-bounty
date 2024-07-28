@@ -23,9 +23,32 @@ local deg3 = math.random(1,360)
 local playerjob = nil
 local getsheriffbounty = 0
 local PoliceHeistBlipCreated = false
+
+---------------------------------------------------------------------------------
+---------------------------- Abort Bounty Timer ---------------------------------
+---------------------------------------------------------------------------------
+
+local AbortedBounty = false
+local AbortBountyTimer = 0
+
+RegisterNetEvent('mms-bounty:client:AbortTimer')
+AddEventHandler('mms-bounty:client:AbortTimer',function ()
+    while AbortedBounty do
+        Citizen.Wait(1000)
+        AbortBountyTimer = AbortBountyTimer + 1
+        if AbortBountyTimer >= Config.AbortBountyTimer then
+            AbortedBounty = false
+            AbortBountyTimer = 0
+            Wait(1000)
+            VORPcore.NotifyTop(_U('CanDoBountyAgain'),"right",4000)
+        end
+    end
+end)
+
 ---------------------------------------------------------------------------------
 ------------------------------Get Playerjob--------------------------------------
 ---------------------------------------------------------------------------------
+
 Citizen.CreateThread(function()
     while playerjob == nil do
         Citizen.Wait(1000)
@@ -194,9 +217,13 @@ Citizen.CreateThread(function ()
         ['border-radius'] = '6px'
         },
     }, function()
-        TriggerEvent('mms-bounty:client:startheist1')
-        HeistBoard:Close({ 
-        })
+        if not AbortedBounty then
+            TriggerEvent('mms-bounty:client:startheist1')
+            HeistBoard:Close({ 
+            })
+        else
+            VORPcore.NotifyTip(_U('AbortedBountyNeedToWaitSec') .. AbortBountyTimer, 5000)
+        end
     end)
     HeistBoardPage1:RegisterElement('button', {
         label =  _U('LabelAbortHeist'),
@@ -890,8 +917,10 @@ RegisterNetEvent('mms-bounty:client:abortheist')
 AddEventHandler('mms-bounty:client:abortheist',function()
     BountyBoard:Close({})
     if HeistActive == true then
+        AbortedBounty = true
         ResetHeist()
         VORPcore.NotifyTip(_U('ActiveHeistAborted'), 5000)
+        TriggerEvent('mms-bounty:client:AbortTimer')
     else
         VORPcore.NotifyTip(_U('NoActiveHeist'), 5000)
     end
@@ -989,7 +1018,7 @@ AddEventHandler('mms-bounty:client:heisttresor',function(Tresor,Cops,TresorHeadi
             spawnedtresor = true
         
             while spawnedtresor == true do
-                Wait(10)
+                Wait(1)
                 local playerCoords = GetEntityCoords(PlayerPedId())
                 local distance = #(playerCoords - Tresor)
                 if distance < 2 then
