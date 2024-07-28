@@ -381,6 +381,7 @@ AddEventHandler('mms-bounty:client:registermenu',function()
         },
     }, function()
         TriggerEvent('mms-bounty:client:abortbounty')
+        TriggerServerEvent('mms-bounty:server:abortbounty')
     end)
     BountyBoardPage1:RegisterElement('button', {
         label =  _U('CloseBoard'),
@@ -568,7 +569,6 @@ AddEventHandler('mms-bounty:client:bountylist',function(eintraege)
         local buttonLabel = _U('Kill') .. bounty.name .. _U('LabelDiff') .. bounty.difficulty .. _U('LabelReward') .. bounty.reward .. '$'
         local difficulty = bounty.difficulty
         local name = bounty.name
-        local reward = bounty.reward
         local id = bounty.id
         BountyBoardPage2:RegisterElement('button', {
             label = buttonLabel,
@@ -578,7 +578,8 @@ AddEventHandler('mms-bounty:client:bountylist',function(eintraege)
             ['border-radius'] = '6px'
             }
         }, function()
-            TriggerEvent('mms-bounty:client:startbounty',id,difficulty,name,reward)
+            TriggerServerEvent('mms-bounty:server:beginNormalMission', id)
+            TriggerEvent('mms-bounty:client:startbounty',id,difficulty,name)
         end)
     end
     BountyBoardPage2:RegisterElement('button', {
@@ -736,24 +737,25 @@ AddEventHandler('mms-bounty:client:startsheriffbounty',function()
 end)
 
 RegisterNetEvent('mms-bounty:client:startbounty')
-AddEventHandler('mms-bounty:client:startbounty',function(id,difficulty,name,reward)
+AddEventHandler('mms-bounty:client:startbounty',function(id,difficulty,name)
     BountyBoard:Close({})
     if MissionActive == false then
-        TriggerServerEvent('mms-bounty:server:deletebounty',id)
+        -- TriggerServerEvent('mms-bounty:server:deletebounty',id)
+        print(id)
         VORPcore.NotifyTip(_U('MissionStartet'), 5000)
         MissionActive = true
         if difficulty == Config.Easy then
             local randomeasy = math.random(1,#Config.EasyMissions)
             local selected = Config.EasyMissions[randomeasy]
-            CheckDistance(selected,reward)
+            CheckDistance(selected,id)
         elseif difficulty == Config.Middle then
             local randommiddle = math.random(1,#Config.MiddleMissions)
             local selected = Config.MiddleMissions[randommiddle]
-            CheckDistance(selected,reward)
+            CheckDistance(selected,id)
         elseif difficulty == Config.Hard then
             local randomhard = math.random(1,#Config.HardMissions)
             local selected = Config.HardMissions[randomhard]
-            CheckDistance(selected,reward)
+            CheckDistance(selected,id)
         end
     
 
@@ -763,7 +765,10 @@ AddEventHandler('mms-bounty:client:startbounty',function(id,difficulty,name,rewa
 end)
 
 
-function CheckDistance(selected,reward)--blip:Remove()
+
+
+
+function CheckDistance(selected,id)--blip:Remove()
     AreaBlip = BccUtils.Blips:SetBlip(_U('MissionBlip'), 'blip_ambient_hunter', 0.2, selected[1].x,selected[1].y,selected[1].z)
     --GPSCoordsBounty = {selected[1].x,selected[1].y,selected[1].z}
     x = selected[1].x
@@ -784,13 +789,13 @@ function CheckDistance(selected,reward)--blip:Remove()
             ClearGpsMultiRoute(x,y,z)
             GPSActiveBounty = false
         end
-        SpawnEnemys(selected,reward)
+        SpawnEnemys(selected,id)
     end
 
 end
 end
 
-function SpawnEnemys(selected,reward)
+function SpawnEnemys(selected,id)
     local modelHash = GetHashKey(Config.Model)
 	while not HasModelLoaded(modelHash) do
 		RequestModel(modelHash)
@@ -827,11 +832,11 @@ function SpawnEnemys(selected,reward)
 	end
     end
     SetModelAsNoLongerNeeded(modelHash)
-    CheckifDead(reward,selected)
+    CheckifDead(id,selected)
 end
 
 
-function CheckifDead(reward,selected)
+function CheckifDead(id,selected)
     
     local chekifdead = 1
     local player = PlayerPedId()
@@ -858,7 +863,7 @@ function CheckifDead(reward,selected)
             if SheriffMission then 
                 TriggerServerEvent('mms-bounty:server:rewardsheriffmission',reward,playerjob)
             elseif not SheriffMission then
-                TriggerServerEvent('mms-bounty:server:reward',reward)
+                TriggerServerEvent('mms-bounty:server:reward',id)
             end 
         end
 	end

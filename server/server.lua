@@ -8,6 +8,10 @@ local userjob = nil
 local heistactive = false
 local heistcooldown = Config.HeistCooldown * 60
 
+
+local normalBounty = {}
+
+
 -----------------------------------------------------------------------
 -- version checker
 -----------------------------------------------------------------------
@@ -69,6 +73,32 @@ end
 end)
 
 
+AddEventHandler('playerDropped', function(reason)
+    local _source = source
+
+    if normalBounty[_source] then
+        normalBounty[_source] = nil
+    end
+end)
+
+RegisterServerEvent('mms-bounty:server:beginNormalMission', function(id)
+    local _source = source
+    if not normalBounty[_source] then
+        normalBounty[_source] = {
+            id = id,
+            startTime = os.time()
+        }
+    end
+end)
+
+RegisterServerEvent('mms-bounty:server:abortbounty', function()
+    local _source = source
+    if normalBounty[_source] then
+        normalBounty[_source] = nil
+    end
+end)
+
+
 RegisterServerEvent('mms-bounty:server:addbountyonabort',function()
     local count = MySQL.query.await('SELECT COUNT(*) FROM mms_bounty;')[1]
     for _,v in pairs(count) do
@@ -125,31 +155,59 @@ RegisterServerEvent('mms-bounty:server:getbountyfromdb',function()
     end)
 end)
 
-RegisterServerEvent('mms-bounty:server:deletebounty',function(id)
+
+RegisterServerEvent('mms-bounty:server:reward', function(id, selected)
     local src = source
-    MySQL.query('SELECT * FROM mms_bounty WHERE id = ?', {id}, function(result)
-        if result ~= nil then
+    local Character = VORPcore.getUser(src).getUsedCharacter
+
+
+    if not normalBounty[src] or normalBounty[src].id ~= id then
+        return
+    end
+
+    local nowTime = os.time()
+    local startTime = normalBounty[src].startTime
+    if (nowTime - startTime) < 240 then
+        return
+    end
+
+    MySQL.query('SELECT reward FROM mms_bounty WHERE id = ?', {id}, function(result)
+        if result and #result > 0 then
+            local reward = result[1].reward
+
+            Character.addCurrency(0, reward)
+            VORPcore.NotifyTip(src, _U('RewardGet') .. reward .. '$', 5000)
+
+            local firstname = Character.firstname
+            local lastname = Character.lastname
+
+            if Config.WebHook then
+                VORPcore.AddWebhook(
+                    Config.WHTitle,
+                    Config.WHLink,
+                    firstname .. ' ' .. lastname .. ' Got A Reward from Bounty $ ' .. reward,
+                    Config.WHColor,
+                    Config.WHName,
+                    Config.WHLogo,
+                    Config.WHFooterLogo,
+                    Config.WHAvatar
+                )
+            end
+
+            normalBounty[src] = nil
+
             MySQL.execute('DELETE FROM mms_bounty WHERE id = ?', { id }, function()
             end)
-        
         else
-            VORPcore.NotifyTip(src, 'Error This Id not in Database ( Database Error Contact Support)!',  5000)
+            VORPcore.NotifyTip(src, 'Error: Bounty ID not found in Database!', 5000)
         end
     end)
 end)
 
 
-RegisterServerEvent('mms-bounty:server:reward',function(reward)
-    local src = source
-    local Character = VORPcore.getUser(src).getUsedCharacter
-    Character.addCurrency(0, reward)
-    VORPcore.NotifyTip(src, _U('RewardGet') .. reward .. '$',  5000)
-    local firstname = Character.firstname
-    local lastname = Character.lastname
-    if Config.WebHook then
-        VORPcore.AddWebhook(Config.WHTitle, Config.WHLink, firstname .. ' ' .. lastname .. ' Got A Reward from Bounty $ ' .. reward, Config.WHColor, Config.WHName, Config.WHLogo, Config.WHFooterLogo, Config.WHAvatar)
-    end
-end)
+
+
+
 
 RegisterServerEvent('mms-bounty:server:rewardsheriffmission',function(reward,playerjob)
     local src = source
@@ -180,17 +238,6 @@ RegisterServerEvent('mms-bounty:server:rewardsheriffmission',function(reward,pla
 end)
 
 
-RegisterServerEvent('mms-bounty:server:checklockpick',function(Cops)
-    local src = source
-    local itemCount = exports.vorp_inventory:getItemCount(src, nil, Config.LockpickItem,nil)
-        if itemCount > 0 then
-            exports.vorp_inventory:subItem(src, Config.LockpickItem, 1)
-            TriggerClientEvent('mms-bounty:client:haslockpick',src,Cops)
-        else
-            VORPcore.NotifyTip(src, _U('MissingLockpick'),  5000)
-        end
-end)
-
 RegisterServerEvent('mms-bounty:server:heistreward',function()
     local heistreward = math.random(Config.HeistRewardMin,Config.HeistRewardMax)
     local src = source
@@ -215,6 +262,18 @@ RegisterServerEvent('mms-bounty:server:heistreward',function()
         end
     end
 end)
+
+RegisterServerEvent('mms-bounty:server:checklockpick',function(Cops)
+    local src = source
+    local itemCount = exports.vorp_inventory:getItemCount(src, nil, Config.LockpickItem,nil)
+        if itemCount > 0 then
+            exports.vorp_inventory:subItem(src, Config.LockpickItem, 1)
+            TriggerClientEvent('mms-bounty:client:haslockpick',src,Cops)
+        else
+            VORPcore.NotifyTip(src, _U('MissingLockpick'),  5000)
+        end
+end)
+
 
 -------------------------------- SHERIFF BountyAdd ------------------------------------
 
