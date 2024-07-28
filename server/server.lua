@@ -144,6 +144,11 @@ RegisterServerEvent('mms-bounty:server:reward',function(reward)
     local Character = VORPcore.getUser(src).getUsedCharacter
     Character.addCurrency(0, reward)
     VORPcore.NotifyTip(src, _U('RewardGet') .. reward .. '$',  5000)
+    local firstname = Character.firstname
+    local lastname = Character.lastname
+    if Config.WebHook then
+        VORPcore.AddWebhook(Config.WHTitle, Config.WHLink, firstname .. ' ' .. lastname .. ' Got A Reward from Bounty $ ' .. reward, Config.WHColor, Config.WHName, Config.WHLogo, Config.WHFooterLogo, Config.WHAvatar)
+    end
 end)
 
 RegisterServerEvent('mms-bounty:server:rewardsheriffmission',function(reward,playerjob)
@@ -158,9 +163,19 @@ RegisterServerEvent('mms-bounty:server:rewardsheriffmission',function(reward,pla
         local newbalance = result[1][Config.BalanceColumn] + reward
         MySQL.update("UPDATE ".. Database .. " SET "..BalanceColumn.." = ? WHERE "..JobColumn.." = ?",{newbalance, Job})
         VORPcore.NotifyTip(src, _U('RewardGetSheriffMission') .. reward .. '$',  5000)
+        local firstname = Character.firstname
+        local lastname = Character.lastname
+        if Config.WebHook then
+            VORPcore.AddWebhook(Config.WHTitle, Config.WHLink, firstname .. ' ' .. lastname .. ' Got A Reward from Sheriff Mission To Ledger $ ' .. reward, Config.WHColor, Config.WHName, Config.WHLogo, Config.WHFooterLogo, Config.WHAvatar)
+        end
     else
         Character.addCurrency(0, reward)
         VORPcore.NotifyTip(src, _U('RewardGet') .. reward .. '$',  5000)
+        local firstname = Character.firstname
+        local lastname = Character.lastname
+        if Config.WebHook then
+            VORPcore.AddWebhook(Config.WHTitle, Config.WHLink, firstname .. ' ' .. lastname .. ' Got A Reward from SheriffMission $ ' .. reward, Config.WHColor, Config.WHName, Config.WHLogo, Config.WHFooterLogo, Config.WHAvatar)
+        end
     end
 end)
 
@@ -180,6 +195,11 @@ RegisterServerEvent('mms-bounty:server:heistreward',function()
     local heistreward = math.random(Config.HeistRewardMin,Config.HeistRewardMax)
     local src = source
     local Character = VORPcore.getUser(src).getUsedCharacter
+    local firstname = Character.firstname
+    local lastname = Character.lastname
+    if Config.WebHook then
+        VORPcore.AddWebhook(Config.WHTitle, Config.WHLink, firstname .. ' ' .. lastname .. ' Got A Reward from heist $ ' .. heistreward, Config.WHColor, Config.WHName, Config.WHLogo, Config.WHFooterLogo, Config.WHAvatar)
+    end
     Character.addCurrency(0, heistreward)
     VORPcore.NotifyTip(src, _U('HeistRewardGet') .. heistreward .. '$',  5000)
     Citizen.Wait(3000)
@@ -307,7 +327,7 @@ RegisterServerEvent('mms-bounty:server:startheistwebhook',function ()
     local Character = VORPcore.getUser(src).getUsedCharacter
     local Firstname = Character.firstname
     local Lastname = Character.lastname
-    if Config.HeistEnableWebHook then
+    if Config.WebHook then
         VORPcore.AddWebhook(Config.WHTitle, Config.WHLink, Firstname .. ' ' .. Lastname .. ' Startet a Heist', Config.WHColor, Config.WHName, Config.WHLogo, Config.WHFooterLogo, Config.WHAvatar)
     end
 end)

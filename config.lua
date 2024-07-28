@@ -1,5 +1,18 @@
 Config = {}
 
+--------------- WEBHOOK
+
+Config.WebHook = true
+
+Config.WHTitle = 'BountyBoard:'
+Config.WHLink = ''  -- Discord WH link Here
+Config.WHColor = 16711680 -- red
+Config.WHName = 'BountyBoard:' -- name
+Config.WHLogo = '' -- must be 30x30px
+Config.WHFooterLogo = '' -- must be 30x30px
+Config.WHAvatar = '' -- must be 30x30px
+
+
 Config.defaultlang = "de_lang" -- Set Language (Current Languages: "en_lang" English, "de_lang" German)
 Config.ServerConsolePrints = true
 
@@ -36,15 +49,6 @@ Config.BountyBoards = {
 }
 
 Config.HeistBoardBlips = true
-Config.HeistEnableWebHook = true
-
-Config.WHTitle = 'BountyBoard:'
-Config.WHLink = ''  -- Discord WH link Here
-Config.WHColor = 16711680 -- red
-Config.WHName = 'BountyBoard:' -- name
-Config.WHLogo = '' -- must be 30x30px
-Config.WHFooterLogo = '' -- must be 30x30px
-Config.WHAvatar = '' -- must be 30x30px
 
 Config.HeistBoards = {
     {coords = vector3(-1445.85, -2309.22, 44.56)},   --- Also the Location of Blip (Thieves Landing)  

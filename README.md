@@ -64,6 +64,7 @@
 - 1.2.6
 - Abort Bounty Timer If you abourt a Bounty you need to Wait now till the TImer is Over. ( SPAM PROTECTION )
 - Fixed Blinking Tresor Bug for Some PPL.
+- Added Security Webhooks you see if someone Gets Reward
 
 
 # installation 
