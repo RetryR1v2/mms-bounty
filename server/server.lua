@@ -59,11 +59,15 @@ Citizen.CreateThread(function()
     local getrandomname = Config.Names[rn]
     local randomname = getrandomname.name
         MySQL.insert('INSERT INTO `mms_bounty` (difficulty, reward, name) VALUES (?, ?, ?)', {diff,reward,randomname}, function()end)
-        print(bountycount)
+        if Config.ServerConsolePrints == true then
+            print(bountycount)
+        end
         Citizen.Wait(Config.CreateBountyTime*60000)
 else
     Citizen.Wait(Config.CreateBountyTime*60000)
-    print('Max Bounty Amount Cant Create More Bountys Bounty Count: '..bountycount)
+    if Config.ServerConsolePrints == true then
+        print('Max Bounty Amount Cant Create More Bountys Bounty Count: '..bountycount)
+    end
 end
 end
 end)
@@ -81,11 +85,9 @@ RegisterServerEvent('mms-bounty:server:addbountyonabort',function()
         reward = math.random(Config.MinEasyReward,Config.MaxEasyReward)
     elseif difficulty == 2 then
         diff = Config.Middle
-        print(diff)
         reward = math.random(Config.MinMiddleReward,Config.MaxMiddleReward)
     elseif difficulty == 3 then
         diff = Config.Hard
-        print(diff)
         reward = math.random(Config.MinHardReward,Config.MaxHardReward)
     end
     local rn = math.random(1,#Config.Names)
@@ -99,7 +101,7 @@ RegisterServerEvent('mms-bounty:server:addbountyonabort',function()
 else
     Citizen.Wait(Config.CreateBountyTime*60000)
     if Config.ServerConsolePrints == true then
-    print('Max Bounty Amount Cant Create More Bountys Bounty Count: '..bountycount)
+        print('Max Bounty Amount Cant Create More Bountys Bounty Count: '..bountycount)
     end
 end
 end)
@@ -146,6 +148,8 @@ RegisterServerEvent('mms-bounty:server:reward',function(reward)
     VORPcore.NotifyTip(src, _U('RewardGet') .. reward .. '$',  5000)
     local firstname = Character.firstname
     local lastname = Character.lastname
+    local EXPGain = Config.BountyEXP
+    BattlepassReward (src,EXPGain)
     if Config.WebHook then
         VORPcore.AddWebhook(Config.WHTitle, Config.WHLink, firstname .. ' ' .. lastname .. ' Got A Reward from Bounty $ ' .. reward, Config.WHColor, Config.WHName, Config.WHLogo, Config.WHFooterLogo, Config.WHAvatar)
     end
@@ -168,6 +172,8 @@ RegisterServerEvent('mms-bounty:server:rewardsheriffmission',function(reward,pla
         if Config.WebHook then
             VORPcore.AddWebhook(Config.WHTitle, Config.WHLink, firstname .. ' ' .. lastname .. ' Got A Reward from Sheriff Mission To Ledger $ ' .. reward, Config.WHColor, Config.WHName, Config.WHLogo, Config.WHFooterLogo, Config.WHAvatar)
         end
+        local EXPGain = Config.SheriffBountyEXP
+        BattlepassReward (src,EXPGain)
     else
         Character.addCurrency(0, reward)
         VORPcore.NotifyTip(src, _U('RewardGet') .. reward .. '$',  5000)
@@ -176,6 +182,8 @@ RegisterServerEvent('mms-bounty:server:rewardsheriffmission',function(reward,pla
         if Config.WebHook then
             VORPcore.AddWebhook(Config.WHTitle, Config.WHLink, firstname .. ' ' .. lastname .. ' Got A Reward from SheriffMission $ ' .. reward, Config.WHColor, Config.WHName, Config.WHLogo, Config.WHFooterLogo, Config.WHAvatar)
         end
+        local EXPGain = Config.SheriffBountyEXP
+        BattlepassReward (src,EXPGain)
     end
 end)
 
@@ -203,6 +211,8 @@ RegisterServerEvent('mms-bounty:server:heistreward',function()
     Character.addCurrency(0, heistreward)
     VORPcore.NotifyTip(src, _U('HeistRewardGet') .. heistreward .. '$',  5000)
     Citizen.Wait(3000)
+    local EXPGain = Config.HeistEXP
+    BattlepassReward (src,EXPGain)
     if Config.LuckyItemsActive == true then
         local randomitemtable = math.random(1,#Config.LuckyItems)
         local getrandomitem = Config.LuckyItems[randomitemtable]
@@ -215,6 +225,14 @@ RegisterServerEvent('mms-bounty:server:heistreward',function()
         end
     end
 end)
+
+-------------------------------- Battlepass Reward ------------------------------------
+
+function BattlepassReward (src,EXPGain)
+    if Config.BattlepassActive then
+        TriggerEvent('mms-battlepass:server:GainExp',src,EXPGain)
+    end
+end
 
 -------------------------------- SHERIFF BountyAdd ------------------------------------
 

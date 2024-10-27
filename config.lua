@@ -12,9 +12,15 @@ Config.WHLogo = '' -- must be 30x30px
 Config.WHFooterLogo = '' -- must be 30x30px
 Config.WHAvatar = '' -- must be 30x30px
 
+----- mms-Battlepass Settings
+
+Config.BattlepassActive = true
+Config.HeistEXP = 50
+Config.BountyEXP = 50
+Config.SheriffBountyEXP = 50
 
 Config.defaultlang = "de_lang" -- Set Language (Current Languages: "en_lang" English, "de_lang" German)
-Config.ServerConsolePrints = true
+Config.ServerConsolePrints = false
 
 Config.AbortBountyTimer = 600  -- Time In Secounds after Abort when to Start Again
 Config.BoardBlips = true
@@ -35,6 +41,7 @@ Config.Jobs= {
 }
 
 Config.AbortDistance = 180 --Distance the Bounty will Abort
+
 
 Config.Easy = 'Einfach'
 Config.Middle = 'Mittel'     -------------- This Need to  Translated Here Bcs of MySql Error
