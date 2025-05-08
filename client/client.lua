@@ -736,32 +736,78 @@ AddEventHandler('mms-bounty:client:startsheriffbounty',function()
 end)
 
 RegisterNetEvent('mms-bounty:client:startbounty')
-AddEventHandler('mms-bounty:client:startbounty',function(id,difficulty,name,reward)
+AddEventHandler('mms-bounty:client:startbounty', function(id, difficulty, name, reward)
     BountyBoard:Close({})
-    if MissionActive == false then
-        TriggerServerEvent('mms-bounty:server:deletebounty',id)
-        VORPcore.NotifyTip(_U('MissionStartet'), 5000)
-        MissionActive = true
-        if difficulty == Config.Easy then
-            local randomeasy = math.random(1,#Config.EasyMissions)
-            local selected = Config.EasyMissions[randomeasy]
-            CheckDistance(selected,reward)
-        elseif difficulty == Config.Middle then
-            local randommiddle = math.random(1,#Config.MiddleMissions)
-            local selected = Config.MiddleMissions[randommiddle]
-            CheckDistance(selected,reward)
-        elseif difficulty == Config.Hard then
-            local randomhard = math.random(1,#Config.HardMissions)
-            local selected = Config.HardMissions[randomhard]
-            CheckDistance(selected,reward)
-        end
-    
 
-    else
+    if MissionActive then
         VORPcore.NotifyTip(_U('AlreadyHasMission'), 5000)
+        return
     end
+
+    -- Delete bounty from DB
+    TriggerServerEvent('mms-bounty:server:deletebounty', id)
+    VORPcore.NotifyTip(_U('MissionStartet'), 5000)
+
+    -- Ask for group member Server IDs
+    local groupInput = lib.inputDialog("Bounty Group", {
+        {type = "input", label = "Enter Server IDs (comma-separated)", placeholder = "e.g. 3,5,12"}
+    })
+
+    local groupMembers = {}
+
+    if groupInput and groupInput[1] ~= "" then
+        for id in string.gmatch(groupInput[1], "%d+") do
+            table.insert(groupMembers, tonumber(id))
+        end
+    end
+
+    -- Include self in the group
+    table.insert(groupMembers, GetPlayerServerId(PlayerId()))
+
+    VORPcore.NotifyTip("Starting bounty with "..#groupMembers.." players", 4000)
+
+    -- Send group to server
+    TriggerServerEvent('mms-bounty:server:createbountygroup', groupMembers)
+
+    MissionActive = true
+
+    -- Select mission
+    local selected
+    if difficulty == Config.Easy then
+        selected = Config.EasyMissions[math.random(1, #Config.EasyMissions)]
+    elseif difficulty == Config.Middle then
+        selected = Config.MiddleMissions[math.random(1, #Config.MiddleMissions)]
+    elseif difficulty == Config.Hard then
+        selected = Config.HardMissions[math.random(1, #Config.HardMissions)]
+    end
+
+    -- Share waypoint with all group members
+    TriggerServerEvent('mms-bounty:server:sendBountyWaypoint', selected)
+
+    -- Start mission logic for the initiating player
+    CheckDistance(selected, reward)
 end)
 
+RegisterNetEvent('mms-bounty:client:setWaypoint')
+AddEventHandler('mms-bounty:client:setWaypoint', function(selected)
+    local coords = selected[1]
+    AreaBlip = BccUtils.Blips:SetBlip(_U('MissionBlip'), 'blip_ambient_hunter', 0.2, coords.x, coords.y, coords.z)
+
+    StartGpsMultiRoute(GetHashKey("COLOR_RED"), true, true)
+    AddPointToGpsMultiRoute(coords.x, coords.y, coords.z)
+    SetGpsMultiRouteRender(true)
+
+    GPSActiveBounty = true
+end)
+
+local currentGroup = {}
+
+RegisterNetEvent('mms-bounty:client:assigngroup')
+AddEventHandler('mms-bounty:client:assigngroup', function(group)
+    currentGroup = group
+    -- Optional: show UI message
+    VORPcore.NotifyTip("You’ve joined a bounty group", 4000)
+end)
 
 function CheckDistance(selected,reward)--blip:Remove()
     AreaBlip = BccUtils.Blips:SetBlip(_U('MissionBlip'), 'blip_ambient_hunter', 0.2, selected[1].x,selected[1].y,selected[1].z)
@@ -784,13 +830,21 @@ function CheckDistance(selected,reward)--blip:Remove()
             ClearGpsMultiRoute(x,y,z)
             GPSActiveBounty = false
         end
-        SpawnEnemys(selected,reward)
+        TriggerServerEvent('mms-bounty:server:spawnGroupEnemies', selected, reward)
     end
 
 end
 end
 
-function SpawnEnemys(selected,reward)
+function SpawnEnemies(selected, reward)
+    for _, member in pairs(currentGroup) do
+        TriggerClientEvent('mms-bounty:client:spawnbounty', member, selected, reward)
+    end
+end
+
+RegisterNetEvent('mms-bounty:client:spawnbounty')
+AddEventHandler('mms-bounty:client:spawnbounty', function(selected, reward)
+
     local modelHash = GetHashKey(Config.Model)
 	while not HasModelLoaded(modelHash) do
 		RequestModel(modelHash)
@@ -828,7 +882,7 @@ function SpawnEnemys(selected,reward)
     end
     SetModelAsNoLongerNeeded(modelHash)
     CheckifDead(reward,selected)
-end
+end)
 
 
 function CheckifDead(reward,selected)
@@ -855,6 +909,8 @@ function CheckifDead(reward,selected)
             VORPcore.NotifyTip(_U('KilledEnemys') .. numberofDeadPeds , 5000)
             chekifdead = 0
             Reset()
+            TriggerServerEvent('mms-bounty:server:cleargroup')
+            currentGroup = {}
             if SheriffMission then 
                 TriggerServerEvent('mms-bounty:server:rewardsheriffmission',reward,playerjob)
             elseif not SheriffMission then

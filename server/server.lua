@@ -72,6 +72,56 @@ end
 end
 end)
 
+local bountyGroups = {}
+
+RegisterNetEvent('mms-bounty:server:createbountygroup')
+AddEventHandler('mms-bounty:server:createbountygroup', function(members)
+    local source = source
+    bountyGroups[source] = members
+
+    for _, id in pairs(members) do
+        TriggerClientEvent('mms-bounty:client:assigngroup', id, members)
+    end
+end)
+
+RegisterNetEvent('mms-bounty:server:cleargroup')
+AddEventHandler('mms-bounty:server:cleargroup', function()
+    local src = source
+    local group = bountyGroups[src]
+
+    if group then
+        for _, member in ipairs(group) do
+            -- Reset client-side group too
+            TriggerClientEvent('mms-bounty:client:assigngroup', member, {})
+            VORPcore.NotifyTip(member, "Your bounty group has been disbanded.", 5000)
+            bountyGroups[member] = nil
+        end
+    end
+end)
+
+RegisterNetEvent('mms-bounty:server:sendBountyWaypoint')
+AddEventHandler('mms-bounty:server:sendBountyWaypoint', function(selected)
+    local src = source
+    local group = bountyGroups[src]
+
+    if group then
+        for _, member in ipairs(group) do
+            TriggerClientEvent('mms-bounty:client:setWaypoint', member, selected)
+        end
+    end
+end)
+
+RegisterNetEvent('mms-bounty:server:spawnGroupEnemies')
+AddEventHandler('mms-bounty:server:spawnGroupEnemies', function(selected, reward)
+    local src = source
+    local group = bountyGroups[src]
+
+    if group then
+        for _, member in ipairs(group) do
+            TriggerClientEvent('mms-bounty:client:spawnbounty', member, selected, reward)
+        end
+    end
+end)
 
 RegisterServerEvent('mms-bounty:server:addbountyonabort',function()
     local count = MySQL.query.await('SELECT COUNT(*) FROM mms_bounty;')[1]
@@ -338,6 +388,10 @@ Citizen.CreateThread(function ()
     end
 end)
 
+AddEventHandler('playerDropped', function(reason)
+    local src = source
+    bountyGroups[src] = nil
+end)
 
 -------WEBHOOK-----
 RegisterServerEvent('mms-bounty:server:startheistwebhook',function ()
