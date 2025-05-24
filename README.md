@@ -67,7 +67,9 @@
 - Added Security Webhooks you see if someone Gets Reward
 - 1.2.7 
 - Added Battlepass Support for MMS-Battlepass
-- 1.2.8 Merged Pull Request Added Group Support from hela
+- 1.2.9 Added Group Support
+- Added Group Rewards
+- Added Webhook for Group
 
 # installation 
 

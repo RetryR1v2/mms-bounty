@@ -5,7 +5,7 @@ Config = {}
 Config.WebHook = true
 
 Config.WHTitle = 'BountyBoard:'
-Config.WHLink = ''  -- Discord WH link Here
+Config.WHLink = 'https://discord.com/api/webhooks/1345723282204266528/idb7KxrIBmZDto7cPgDMBUmpPEE7bHtWRsW65iGZV1rSW4z8oH5PDQUgrY-R3ePt_zc3'  -- Discord WH link Here
 Config.WHColor = 16711680 -- red
 Config.WHName = 'BountyBoard:' -- name
 Config.WHLogo = '' -- must be 30x30px
@@ -30,18 +30,18 @@ Config.DistanceSpawnEnemys = 60  --- Enemys Spawn if you are 60 Meters Away or C
 
 Config.Jobs= {
     {
-        JobName = 'msbw',
-    },
-    {
-        JobName = 'sheriffval',
-    },
-    {
-        JobName = 'marshall',
+        JobName = 'ms1',
     },
 }
 
 Config.AbortDistance = 180 --Distance the Bounty will Abort
 
+----------------- GROUP SUPPORT ------------------
+
+Config.UseGroupSystem = true
+Config.GroupRange = 20
+
+--------------------------------------------------
 
 Config.Easy = 'Einfach'
 Config.Middle = 'Mittel'     -------------- This Need to  Translated Here Bcs of MySql Error
@@ -53,6 +53,7 @@ Config.BountyBoards = {
     {coords = vector3(1353.66, -1304.22, 76.86)},   --- Also the Location of Blip and Npc (Rhodes)
     {coords = vector3(1353.66, -1304.22, 76.86)},   --- Also the Location of Blip and Npc (SaintDenise)},
     {coords = vector3(2512.96, -1305.06, 49.0)},
+    {coords = vector3(-346.21, -149.96, 50.74)},   --- Also the Location of Blip and Npc (Limpany)},
 }
 
 Config.HeistBoardBlips = true
@@ -88,14 +89,14 @@ Config.Names = {  --- This will be the Target name in Bountyboard Name will pcik
 
 -------------------------------- Reward System ----------------------------------
 -- Easy
-Config.MinEasyReward = 25
-Config.MaxEasyReward = 50
+Config.MinEasyReward = 5
+Config.MaxEasyReward = 10
 -- Middle
-Config.MinMiddleReward = 50
-Config.MaxMiddleReward = 75
+Config.MinMiddleReward = 11
+Config.MaxMiddleReward = 25
 -- Hard
-Config.MinHardReward = 75
-Config.MaxHardReward = 100
+Config.MinHardReward = 26
+Config.MaxHardReward = 40
 
 ------------------------------- Outlaw Model
 
@@ -899,8 +900,8 @@ Config.HardMissions = {
 
 Config.HeistMissionsActive = true
 Config.LockpickItem = 'lockpick'
-Config.HeistRewardMin = 75
-Config.HeistRewardMax = 100
+Config.HeistRewardMin = 25
+Config.HeistRewardMax = 50
 Config.CopModel = 'CS_VALSHERIFF'
 Config.LuckyItemsActive = true  --- true / false If items in Saves Too
 Config.HeistNpcs = true  --- true / false If NPC Police is Spawning or Not
@@ -999,8 +1000,8 @@ Config.HeistMissions = {
     },
 }
 
-Config.SheriffRewardMin = 50
-Config.SheriffRewardMax = 100
+Config.SheriffRewardMin = 10
+Config.SheriffRewardMax = 25
 
 ---------------------------------------------------------------------------------------------
 ---- CAREFULL ---> Only Use if you Know what you do Else set it to False <---- CAREFULL -----

@@ -19,10 +19,16 @@ local deg1 = math.random(1,360)
 local deg2 = math.random(1,360)
 local deg3 = math.random(1,360)
 
+local GroupBlip = nil
+local GroupMissionActive = false
 
 local playerjob = nil
+local MyName = nil
 local getsheriffbounty = 0
 local PoliceHeistBlipCreated = false
+
+local ChooseGroupMember = false
+local PickedUsers = {}
 
 ---------------------------------------------------------------------------------
 ---------------------------- Abort Bounty Timer ---------------------------------
@@ -57,8 +63,9 @@ Citizen.CreateThread(function()
 end)
 
 RegisterNetEvent('mms-bounty:client:getplayerjob')
-AddEventHandler('mms-bounty:client:getplayerjob',function(job)
+AddEventHandler('mms-bounty:client:getplayerjob',function(job,Name)
     playerjob = job
+    MyName = Name
     if playerjob == nil then
         Citizen.Wait(500)
     else
@@ -222,7 +229,7 @@ Citizen.CreateThread(function ()
             HeistBoard:Close({ 
             })
         else
-            VORPcore.NotifyTip(_U('AbortedBountyNeedToWaitSec') .. AbortBountyTimer, 5000)
+            VORPcore.NotifyRightTip(_U('AbortedBountyNeedToWaitSec') .. AbortBountyTimer, 5000)
         end
     end)
     HeistBoardPage1:RegisterElement('button', {
@@ -578,7 +585,11 @@ AddEventHandler('mms-bounty:client:bountylist',function(eintraege)
             ['border-radius'] = '6px'
             }
         }, function()
-            TriggerEvent('mms-bounty:client:startbounty',id,difficulty,name,reward)
+            if Config.UseGroupSystem then
+                TriggerEvent('mms-bounty:client:startbountyGroup',id,difficulty,name,reward)
+            else
+                TriggerEvent('mms-bounty:client:startbounty',id,difficulty,name,reward)
+            end
         end)
     end
     BountyBoardPage2:RegisterElement('button', {
@@ -712,11 +723,12 @@ RegisterNetEvent('mms-bounty:client:abortbounty')
 AddEventHandler('mms-bounty:client:abortbounty',function()
     BountyBoard:Close({})
     if MissionActive == true then
-    Reset()
-    TriggerServerEvent('mms-bounty:server:addbountyonabort')
-    VORPcore.NotifyTip(_U('ActiveMissionAborted'), 5000)
+        TriggerServerEvent('mms-bounty:server:AbortBountyGroup',PickedUsers)
+        TriggerServerEvent('mms-bounty:server:addbountyonabort')
+        VORPcore.NotifyRightTip(_U('ActiveMissionAborted'), 5000)
+        Reset()
     else
-        VORPcore.NotifyTip(_U('NoActiveBounty'), 5000)
+        VORPcore.NotifyRightTip(_U('NoActiveBounty'), 5000)
     end
 end)
 
@@ -728,88 +740,195 @@ AddEventHandler('mms-bounty:client:startsheriffbounty',function()
         local reward = math.random(Config.SheriffRewardMin,Config.SheriffRewardMax)
         SheriffMission = true
         MissionActive = true
-        VORPcore.NotifyTip(_U('MissionStartet'), 5000)
+        VORPcore.NotifyRightTip(_U('MissionStartet'), 5000)
         CheckDistance(selected,reward)
     else
-        VORPcore.NotifyTip(_U('AlreadyHasMission'), 5000)
+        VORPcore.NotifyRightTip(_U('AlreadyHasMission'), 5000)
     end
 end)
 
 RegisterNetEvent('mms-bounty:client:startbounty')
-AddEventHandler('mms-bounty:client:startbounty', function(id, difficulty, name, reward)
+AddEventHandler('mms-bounty:client:startbounty',function(id,difficulty,name,reward)
     BountyBoard:Close({})
+    if MissionActive == false then
+        TriggerServerEvent('mms-bounty:server:deletebounty',id)
+        VORPcore.NotifyRightTip(_U('MissionStartet'), 5000)
+        MissionActive = true
+        if difficulty == Config.Easy then
+            local randomeasy = math.random(1,#Config.EasyMissions)
+            local selected = Config.EasyMissions[randomeasy]
+            CheckDistance(selected,reward)
+        elseif difficulty == Config.Middle then
+            local randommiddle = math.random(1,#Config.MiddleMissions)
+            local selected = Config.MiddleMissions[randommiddle]
+            CheckDistance(selected,reward)
+        elseif difficulty == Config.Hard then
+            local randomhard = math.random(1,#Config.HardMissions)
+            local selected = Config.HardMissions[randomhard]
+            CheckDistance(selected,reward)
+        end
+    
 
-    if MissionActive then
-        VORPcore.NotifyTip(_U('AlreadyHasMission'), 5000)
-        return
+    else
+        VORPcore.NotifyRightTip(_U('AlreadyHasMission'), 5000)
     end
+end)
 
-    -- Delete bounty from DB
-    TriggerServerEvent('mms-bounty:server:deletebounty', id)
-    VORPcore.NotifyTip(_U('MissionStartet'), 5000)
+-- Group Support
 
-    -- Ask for group member Server IDs
-    local groupInput = lib.inputDialog("Bounty Group", {
-        {type = "input", label = "Enter Server IDs (comma-separated)", placeholder = "e.g. 3,5,12"}
+RegisterNetEvent('mms-bounty:client:startbountyGroup')
+AddEventHandler('mms-bounty:client:startbountyGroup',function(id,difficulty,name,reward)
+    local CloseUsers = VORPcore.Callback.TriggerAwait('mms-bounty:callback:GetClosePlayers')
+    Citizen.Wait(500)
+    if not ChooseGroupMember then
+        ChooseGroupMember = true
+    else
+        BountyBoardPage5:UnRegister()
+    end
+    BountyBoardPage5 = BountyBoard:RegisterPage('seite5')
+    BountyBoardPage5:RegisterElement('header', {
+        value = _U('ChooseGroupMember'),
+        slot = 'header',
+        style = {
+        ['color'] = 'orange',
+        }
     })
+    BountyBoardPage5:RegisterElement('line', {
+        slot = 'header',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+    for h,v in ipairs(CloseUsers) do
+        local CurrentUser = CloseUsers[h]
+        local CheckboxLabel = v.firstname .. ' ' .. v.lastname
+        BountyBoardPage5:RegisterElement("checkbox", {
+            label = CheckboxLabel,
+            start = false,
+            sound = {
+                action = "SELECT",
+                soundset = "RDRO_Character_Creator_Sounds"
+            }
+        }, function(data)
+            if data.value then
+                table.insert(PickedUsers,CurrentUser)
+            else
+                for h,v in ipairs(PickedUsers) do
+                    if v.firstname == CurrentUser.firstname then
+                        table.remove(PickedUsers, h)
+                    end
+                end
+            end
+        end)
+    end
+    BountyBoardPage5:RegisterElement('button', {
+        label =  _U('StartGoupBounty'),
+        style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px'
+        },
+    }, function()
+        BountyBoard:Close({})
+        TriggerEvent('mms-bounty:client:StartTheBountyWithGroup',id,difficulty,name,reward,PickedUsers)
+    end)
+    BountyBoardPage5:RegisterElement('button', {
+        label =  _U('CloseBoard'),
+        style = {
+        ['background-color'] = '#FF8C00',
+        ['color'] = 'orange',
+        ['border-radius'] = '6px'
+        },
+    }, function()
+        BountyBoard:Close({ 
+        })
+    end)
+    BountyBoardPage5:RegisterElement('subheader', {
+        value = _U('BoardHeader'),
+        slot = 'footer',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+    BountyBoardPage5:RegisterElement('line', {
+        slot = 'footer',
+        style = {
+        ['color'] = 'orange',
+        }
+    })
+    BountyBoardPage5:RouteTo()
 
-    local groupMembers = {}
+end)
 
-    if groupInput and groupInput[1] ~= "" then
-        for id in string.gmatch(groupInput[1], "%d+") do
-            table.insert(groupMembers, tonumber(id))
+RegisterNetEvent('mms-bounty:client:StartTheBountyWithGroup')
+AddEventHandler('mms-bounty:client:StartTheBountyWithGroup',function(id,difficulty,name,reward,PickedUsers)
+    if not MissionActive then
+        if not GroupMissionActive then
+            local GroupOwner = MyName
+            TriggerServerEvent('mms-bounty:server:deletebounty',id)
+            VORPcore.NotifyRightTip(_U('MissionStartet'), 5000)
+            MissionActive = true
+            if difficulty == Config.Easy then
+                local randomeasy = math.random(1,#Config.EasyMissions)
+                local selected = Config.EasyMissions[randomeasy]
+                TriggerServerEvent('mms-bounty:server:SetGPSandBlipGroup',selected,PickedUsers,GroupOwner)
+                CheckDistance(selected,reward,PickedUsers)
+            elseif difficulty == Config.Middle then
+                local randommiddle = math.random(1,#Config.MiddleMissions)
+                local selected = Config.MiddleMissions[randommiddle]
+                TriggerServerEvent('mms-bounty:server:SetGPSandBlipGroup',selected,PickedUsers,GroupOwner)
+                CheckDistance(selected,reward,PickedUsers)
+            elseif difficulty == Config.Hard then
+                local randomhard = math.random(1,#Config.HardMissions)
+                local selected = Config.HardMissions[randomhard]
+                TriggerServerEvent('mms-bounty:server:SetGPSandBlipGroup',selected,PickedUsers,GroupOwner)
+                CheckDistance(selected,reward,PickedUsers)
+            end
+        else
+            VORPcore.NotifyRightTip(_U('AlreadyHasGroupMission'), 5000)
+        end
+    else
+        VORPcore.NotifyRightTip(_U('AlreadyHasMission'), 5000)
+    end
+end)
+
+RegisterNetEvent('mms-bounty:client:SetGPSAndBlipGroup')
+AddEventHandler('mms-bounty:client:SetGPSAndBlipGroup',function(selected,GroupOwner)
+    VORPcore.NotifyRightTip(_U('JoinedBountyGroupFrom') .. GroupOwner,5000)
+    GroupBlip = BccUtils.Blips:SetBlip(_U('MissionBlip'), 'blip_ambient_hunter', 0.2, selected[1].x,selected[1].y,selected[1].z)
+    local GroupX = selected[1].x
+    local GroupY = selected[1].y
+    local GroupZ = selected[1].z
+    StartGpsMultiRoute(GetHashKey("COLOR_RED"), true, true)
+    AddPointToGpsMultiRoute(GroupX,GroupY,GroupZ)
+    SetGpsMultiRouteRender(true)
+    local GPSGroupActive = true
+    local notnear = true
+    while notnear and GPSGroupActive do
+        Citizen.Wait(250)
+        local playerCoords = GetEntityCoords(PlayerPedId())
+        local dist = #(playerCoords - selected[1])
+        if dist < Config.DistanceSpawnEnemys then
+            notnear = false
+            if GPSGroupActive then
+                ClearGpsMultiRoute(GroupX,GroupY,GroupZ)
+                GPSGroupActive = false
+            end
+            GroupBlip:Remove()
         end
     end
-
-    -- Include self in the group
-    table.insert(groupMembers, GetPlayerServerId(PlayerId()))
-
-    VORPcore.NotifyTip("Starting bounty with "..#groupMembers.." players", 4000)
-
-    -- Send group to server
-    TriggerServerEvent('mms-bounty:server:createbountygroup', groupMembers)
-
-    MissionActive = true
-
-    -- Select mission
-    local selected
-    if difficulty == Config.Easy then
-        selected = Config.EasyMissions[math.random(1, #Config.EasyMissions)]
-    elseif difficulty == Config.Middle then
-        selected = Config.MiddleMissions[math.random(1, #Config.MiddleMissions)]
-    elseif difficulty == Config.Hard then
-        selected = Config.HardMissions[math.random(1, #Config.HardMissions)]
-    end
-
-    -- Share waypoint with all group members
-    TriggerServerEvent('mms-bounty:server:sendBountyWaypoint', selected)
-
-    -- Start mission logic for the initiating player
-    CheckDistance(selected, reward)
+    GroupMissionActive = true
 end)
 
-RegisterNetEvent('mms-bounty:client:setWaypoint')
-AddEventHandler('mms-bounty:client:setWaypoint', function(selected)
-    local coords = selected[1]
-    AreaBlip = BccUtils.Blips:SetBlip(_U('MissionBlip'), 'blip_ambient_hunter', 0.2, coords.x, coords.y, coords.z)
-
-    StartGpsMultiRoute(GetHashKey("COLOR_RED"), true, true)
-    AddPointToGpsMultiRoute(coords.x, coords.y, coords.z)
-    SetGpsMultiRouteRender(true)
-
-    GPSActiveBounty = true
+RegisterNetEvent('mms-bounty:client:AbortBountyGroup')
+AddEventHandler('mms-bounty:client:AbortBountyGroup',function()
+    GroupMissionActive = false
+    GroupBlip:Remove()
+    ClearGpsMultiRoute()
+    VORPcore(_U('BountyAbortedByLeader'),5000)
 end)
 
-local currentGroup = {}
-
-RegisterNetEvent('mms-bounty:client:assigngroup')
-AddEventHandler('mms-bounty:client:assigngroup', function(group)
-    currentGroup = group
-    -- Optional: show UI message
-    VORPcore.NotifyTip("You’ve joined a bounty group", 4000)
-end)
-
-function CheckDistance(selected,reward)--blip:Remove()
+function CheckDistance(selected,reward,PickedUsers)--blip:Remove()
     AreaBlip = BccUtils.Blips:SetBlip(_U('MissionBlip'), 'blip_ambient_hunter', 0.2, selected[1].x,selected[1].y,selected[1].z)
     --GPSCoordsBounty = {selected[1].x,selected[1].y,selected[1].z}
     x = selected[1].x
@@ -830,21 +949,13 @@ function CheckDistance(selected,reward)--blip:Remove()
             ClearGpsMultiRoute(x,y,z)
             GPSActiveBounty = false
         end
-        TriggerServerEvent('mms-bounty:server:spawnGroupEnemies', selected, reward)
+        SpawnEnemys(selected,reward,PickedUsers)
     end
 
 end
 end
 
-function SpawnEnemies(selected, reward)
-    for _, member in pairs(currentGroup) do
-        TriggerClientEvent('mms-bounty:client:spawnbounty', member, selected, reward)
-    end
-end
-
-RegisterNetEvent('mms-bounty:client:spawnbounty')
-AddEventHandler('mms-bounty:client:spawnbounty', function(selected, reward)
-
+function SpawnEnemys(selected,reward,PickedUsers)
     local modelHash = GetHashKey(Config.Model)
 	while not HasModelLoaded(modelHash) do
 		RequestModel(modelHash)
@@ -881,40 +992,38 @@ AddEventHandler('mms-bounty:client:spawnbounty', function(selected, reward)
 	end
     end
     SetModelAsNoLongerNeeded(modelHash)
-    CheckifDead(reward,selected)
-end)
+    CheckifDead(reward,selected,PickedUsers)
+end
 
 
-function CheckifDead(reward,selected)
+function CheckifDead(reward,selected,PickedUsers)
     
-    local chekifdead = 1
+    local chekifdead = true
     local player = PlayerPedId()
-    while chekifdead == 1 do
-        Citizen.Wait(250)
+    while chekifdead do
+        Citizen.Wait(1000)
         local numberOfAlivePeds = GetNumberOfAlive()
         local numberofDeadPeds = GetNumberOfDead()
         local playerCoords = GetEntityCoords(PlayerPedId())
         dist = #(playerCoords - selected[1])
-        VORPcore.NotifyTip(_U('EnemyRemain') .. numberOfAlivePeds, 5000)
+        VORPcore.NotifyRightTip(_U('EnemyRemain') .. numberOfAlivePeds, 5000)
         if IsEntityDead(player) then
-            VORPcore.NotifyTip(_U('MissionFailed'), 5000)
-            chekifdead = 0
+            VORPcore.NotifyRightTip(_U('MissionFailed'), 5000)
+            chekifdead = false
             Reset()
         elseif dist > Config.AbortDistance then
-            VORPcore.NotifyTip(_U('MissionFailed'), 5000)
-            chekifdead = 0
+            VORPcore.NotifyRightTip(_U('MissionFailed'), 5000)
+            chekifdead = false
             Reset()
         elseif numberOfAlivePeds == 0 then
-            VORPcore.NotifyTip(_U('MissionSuccess'), 5000)
-            VORPcore.NotifyTip(_U('KilledEnemys') .. numberofDeadPeds , 5000)
-            chekifdead = 0
+            VORPcore.NotifyRightTip(_U('MissionSuccess'), 5000)
+            VORPcore.NotifyRightTip(_U('KilledEnemys') .. numberofDeadPeds , 5000)
+            chekifdead = false
             Reset()
-            TriggerServerEvent('mms-bounty:server:cleargroup')
-            currentGroup = {}
-            if SheriffMission then 
+            if SheriffMission then
                 TriggerServerEvent('mms-bounty:server:rewardsheriffmission',reward,playerjob)
             elseif not SheriffMission then
-                TriggerServerEvent('mms-bounty:server:reward',reward)
+                TriggerServerEvent('mms-bounty:server:reward',reward,PickedUsers)
             end 
         end
 	end
@@ -962,8 +1071,15 @@ function Reset()
     end
     AreaBlip:Remove()
 	CreatedOutlaws = {}
+    PickedUsers = {}
     MissionActive = false
 end
+
+RegisterNetEvent('mms-bounty:client:ClearGroup')
+AddEventHandler('mms-bounty:client:ClearGroup',function()
+    PickedUsers = {}
+    GroupMissionActive = false
+end)
 
 ---------------------------------------------------------------------------------
 ----------------------------------HEIST PART-------------------------------------
@@ -975,10 +1091,10 @@ AddEventHandler('mms-bounty:client:abortheist',function()
     if HeistActive == true then
         AbortedBounty = true
         ResetHeist()
-        VORPcore.NotifyTip(_U('ActiveHeistAborted'), 5000)
+        VORPcore.NotifyRightTip(_U('ActiveHeistAborted'), 5000)
         TriggerEvent('mms-bounty:client:AbortTimer')
     else
-        VORPcore.NotifyTip(_U('NoActiveHeist'), 5000)
+        VORPcore.NotifyRightTip(_U('NoActiveHeist'), 5000)
     end
 end)
 
@@ -991,14 +1107,14 @@ RegisterNetEvent('mms-bounty:client:startheist2')
 AddEventHandler('mms-bounty:client:startheist2',function()
     if HeistActive == false then
         TriggerServerEvent('mms-bounty:server:startheistwebhook')
-        VORPcore.NotifyTip(_U('HeistStartetSuccessfully'), 5000)
+        VORPcore.NotifyRightTip(_U('HeistStartetSuccessfully'), 5000)
         HeistActive = true
         local randomheist = math.random(1,#Config.HeistMissions)
             local selected = Config.HeistMissions[randomheist]
             CheckDistanceToHeist(selected)
             
     else
-        VORPcore.NotifyTip(_U('AlreadyHeistActive'), 5000)
+        VORPcore.NotifyRightTip(_U('AlreadyHeistActive'), 5000)
     end
 end)
 
@@ -1021,7 +1137,7 @@ function CheckDistanceToHeist(selected)
         notnear = false
         if Config.HeistAlerts == true then
         TriggerServerEvent('mms-bounty:server:alertpolice',Tresor)
-        VORPcore.NotifyTip(_U('SheriffAlerted'), 5000)
+        VORPcore.NotifyRightTip(_U('SheriffAlerted'), 5000)
         end
         TriggerEvent('mms-bounty:client:heisttresor',Tresor,Cops,TresorHeading)
         --SpawnEnemys(Tresor,Cops)
@@ -1096,7 +1212,7 @@ AddEventHandler('mms-bounty:client:haslockpick',function(Cops)
     Citizen.Wait(1000)
     MiniGame.Start('lockpick', lockpicksettings, function(result)
         if result.unlocked == true then
-            VORPcore.NotifyTip(_U('LockpickingSuccess'), 5000)
+            VORPcore.NotifyRightTip(_U('LockpickingSuccess'), 5000)
             Citizen.Wait(3000)
                 if Config.HeistNpcs == true then
                     progressbar.start('Tresor wird Geknackt!', 5000, function ()
@@ -1108,7 +1224,7 @@ AddEventHandler('mms-bounty:client:haslockpick',function(Cops)
                     ResetHeist()
                 end
         else
-            VORPcore.NotifyTip(_U('LockpickingFailed'), 5000)
+            VORPcore.NotifyRightTip(_U('LockpickingFailed'), 5000)
         end
     end)
 end)
@@ -1152,16 +1268,16 @@ function CheckifDeadOrEscaped()
         local playerCoords = GetEntityCoords(PlayerPedId())
         local escapedistance = #(playerCoords - startcoords)
         if IsEntityDead(player) then
-            VORPcore.NotifyTip(_U('YouDied'), 10000)
+            VORPcore.NotifyRightTip(_U('YouDied'), 10000)
             ResetHeist()
             chekifdead = 0
         elseif numberOfAlivePeds == 0 then
-            VORPcore.NotifyTip(_U('YouKilledAllCops'), 5000)
+            VORPcore.NotifyRightTip(_U('YouKilledAllCops'), 5000)
             TriggerServerEvent('mms-bounty:server:heistreward')
             ResetHeist()
             chekifdead = 0
         elseif escapedistance > 300 then
-            VORPcore.NotifyTip(_U('YouAreEscaped'), 5000)
+            VORPcore.NotifyRightTip(_U('YouAreEscaped'), 5000)
             ResetHeist()
             chekifdead = 0
         end

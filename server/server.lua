@@ -72,56 +72,6 @@ end
 end
 end)
 
-local bountyGroups = {}
-
-RegisterNetEvent('mms-bounty:server:createbountygroup')
-AddEventHandler('mms-bounty:server:createbountygroup', function(members)
-    local source = source
-    bountyGroups[source] = members
-
-    for _, id in pairs(members) do
-        TriggerClientEvent('mms-bounty:client:assigngroup', id, members)
-    end
-end)
-
-RegisterNetEvent('mms-bounty:server:cleargroup')
-AddEventHandler('mms-bounty:server:cleargroup', function()
-    local src = source
-    local group = bountyGroups[src]
-
-    if group then
-        for _, member in ipairs(group) do
-            -- Reset client-side group too
-            TriggerClientEvent('mms-bounty:client:assigngroup', member, {})
-            VORPcore.NotifyTip(member, "Your bounty group has been disbanded.", 5000)
-            bountyGroups[member] = nil
-        end
-    end
-end)
-
-RegisterNetEvent('mms-bounty:server:sendBountyWaypoint')
-AddEventHandler('mms-bounty:server:sendBountyWaypoint', function(selected)
-    local src = source
-    local group = bountyGroups[src]
-
-    if group then
-        for _, member in ipairs(group) do
-            TriggerClientEvent('mms-bounty:client:setWaypoint', member, selected)
-        end
-    end
-end)
-
-RegisterNetEvent('mms-bounty:server:spawnGroupEnemies')
-AddEventHandler('mms-bounty:server:spawnGroupEnemies', function(selected, reward)
-    local src = source
-    local group = bountyGroups[src]
-
-    if group then
-        for _, member in ipairs(group) do
-            TriggerClientEvent('mms-bounty:client:spawnbounty', member, selected, reward)
-        end
-    end
-end)
 
 RegisterServerEvent('mms-bounty:server:addbountyonabort',function()
     local count = MySQL.query.await('SELECT COUNT(*) FROM mms_bounty;')[1]
@@ -171,7 +121,7 @@ RegisterServerEvent('mms-bounty:server:getbountyfromdb',function()
             end
                 TriggerClientEvent('mms-bounty:client:bountylist', src, eintraege)
         elseif bountycount == 0 then
-            VORPcore.NotifyTip(src, _U('NoBountys'), 5000)
+            VORPcore.NotifyRightTip(src, _U('NoBountys'), 5000)
             TriggerClientEvent('mms-bounty:client:nobounty', src)
         end
     end)
@@ -185,23 +135,43 @@ RegisterServerEvent('mms-bounty:server:deletebounty',function(id)
             end)
         
         else
-            VORPcore.NotifyTip(src, 'Error This Id not in Database ( Database Error Contact Support)!',  5000)
+            VORPcore.NotifyRightTip(src, 'Error This Id not in Database ( Database Error Contact Support)!',  5000)
         end
     end)
 end)
 
 
-RegisterServerEvent('mms-bounty:server:reward',function(reward)
+RegisterServerEvent('mms-bounty:server:reward',function(reward,PickedUsers)
     local src = source
     local Character = VORPcore.getUser(src).getUsedCharacter
     Character.addCurrency(0, reward)
-    VORPcore.NotifyTip(src, _U('RewardGet') .. reward .. '$',  5000)
+    VORPcore.NotifyRightTip(src, _U('RewardGet') .. reward .. '$',  5000)
     local firstname = Character.firstname
     local lastname = Character.lastname
     local EXPGain = Config.BountyEXP
     BattlepassReward (src,EXPGain)
     if Config.WebHook then
         VORPcore.AddWebhook(Config.WHTitle, Config.WHLink, firstname .. ' ' .. lastname .. ' Got A Reward from Bounty $ ' .. reward, Config.WHColor, Config.WHName, Config.WHLogo, Config.WHFooterLogo, Config.WHAvatar)
+    end
+    if Config.UseGroupSystem then
+        for h,v in ipairs(GetPlayers()) do
+            local GroupCharacter = VORPcore.getUser(v).getUsedCharacter
+            local ID = v
+            for h,v in ipairs(PickedUsers) do
+                if v.charIdentifier == GroupCharacter.charIdentifier then
+                    GroupCharacter.addCurrency(0, reward)
+                    VORPcore.NotifyRightTip(ID, _U('RewardGet') .. reward .. '$',  5000)
+                    local Groupfirstname = GroupCharacter.firstname
+                    local Grouplastname = GroupCharacter.lastname
+                    local EXPGain = Config.BountyEXP
+                    BattlepassReward (ID,EXPGain)
+                    TriggerClientEvent('mms-bounty:client:ClearGroup',ID)
+                    if Config.WebHook then
+                        VORPcore.AddWebhook(Config.WHTitle, Config.WHLink, Groupfirstname .. ' ' .. Grouplastname .. ' Got A Reward from Bounty $ ' .. reward, Config.WHColor, Config.WHName, Config.WHLogo, Config.WHFooterLogo, Config.WHAvatar)
+                    end
+                end
+            end
+        end
     end
 end)
 
@@ -216,7 +186,7 @@ RegisterServerEvent('mms-bounty:server:rewardsheriffmission',function(reward,pla
         local result = MySQL.query.await("SELECT "..BalanceColumn.." FROM ".. Database .. " WHERE "..JobColumn.."=?", {Job})
         local newbalance = result[1][Config.BalanceColumn] + reward
         MySQL.update("UPDATE ".. Database .. " SET "..BalanceColumn.." = ? WHERE "..JobColumn.." = ?",{newbalance, Job})
-        VORPcore.NotifyTip(src, _U('RewardGetSheriffMission') .. reward .. '$',  5000)
+        VORPcore.NotifyRightTip(src, _U('RewardGetSheriffMission') .. reward .. '$',  5000)
         local firstname = Character.firstname
         local lastname = Character.lastname
         if Config.WebHook then
@@ -226,7 +196,7 @@ RegisterServerEvent('mms-bounty:server:rewardsheriffmission',function(reward,pla
         BattlepassReward (src,EXPGain)
     else
         Character.addCurrency(0, reward)
-        VORPcore.NotifyTip(src, _U('RewardGet') .. reward .. '$',  5000)
+        VORPcore.NotifyRightTip(src, _U('RewardGet') .. reward .. '$',  5000)
         local firstname = Character.firstname
         local lastname = Character.lastname
         if Config.WebHook then
@@ -245,7 +215,7 @@ RegisterServerEvent('mms-bounty:server:checklockpick',function(Cops)
             exports.vorp_inventory:subItem(src, Config.LockpickItem, 1)
             TriggerClientEvent('mms-bounty:client:haslockpick',src,Cops)
         else
-            VORPcore.NotifyTip(src, _U('MissingLockpick'),  5000)
+            VORPcore.NotifyRightTip(src, _U('MissingLockpick'),  5000)
         end
 end)
 
@@ -259,7 +229,7 @@ RegisterServerEvent('mms-bounty:server:heistreward',function()
         VORPcore.AddWebhook(Config.WHTitle, Config.WHLink, firstname .. ' ' .. lastname .. ' Got A Reward from heist $ ' .. heistreward, Config.WHColor, Config.WHName, Config.WHLogo, Config.WHFooterLogo, Config.WHAvatar)
     end
     Character.addCurrency(0, heistreward)
-    VORPcore.NotifyTip(src, _U('HeistRewardGet') .. heistreward .. '$',  5000)
+    VORPcore.NotifyRightTip(src, _U('HeistRewardGet') .. heistreward .. '$',  5000)
     Citizen.Wait(3000)
     local EXPGain = Config.HeistEXP
     BattlepassReward (src,EXPGain)
@@ -271,7 +241,7 @@ RegisterServerEvent('mms-bounty:server:heistreward',function()
         local amount = math.random(1,3)
         if chance > 8 then
             exports.vorp_inventory:addItem(src, randomitemname,amount, nil,nil)
-            VORPcore.NotifyTip(src, _U('HeistRewardGetItem') .. randomitemname,  5000)
+            VORPcore.NotifyRightTip(src, _U('HeistRewardGetItem') .. randomitemname,  5000)
         end
     end
 end)
@@ -289,14 +259,15 @@ end
 RegisterServerEvent('mms-bounty:server:getplayerjob',function()
     local src = source
     local Character = VORPcore.getUser(src).getUsedCharacter
+    local Name = Character.firstname .. ' ' .. Character.lastname
     local job = Character.job
-    TriggerClientEvent('mms-bounty:client:getplayerjob',src,job)
+    TriggerClientEvent('mms-bounty:client:getplayerjob',src,job,Name)
 end)
 
 RegisterServerEvent('mms-bounty:server:addsheriffbounty',function(inputFirstname,inputLastname,inputReason,inputReward)
     local src = source
     MySQL.insert('INSERT INTO `mms_sheriffbounty` (firstname, lastname, reason, reward) VALUES (?, ?, ?, ?)', {inputFirstname,inputLastname,inputReason,inputReward}, function()end)
-    VORPcore.NotifyTip(src, _U('SheriffBountySet'),  5000)
+    VORPcore.NotifyRightTip(src, _U('SheriffBountySet'),  5000)
 end)
 
 RegisterServerEvent('mms-bounty:server:getsheriffbountyfromdb',function()
@@ -314,7 +285,7 @@ RegisterServerEvent('mms-bounty:server:getsheriffbountyfromdb',function()
             end
                 TriggerClientEvent('mms-bounty:client:sheriffbountylist', src, sheriffeintraege)
         elseif bountycount == 0 then
-            VORPcore.NotifyTip(src, _U('NoBountys'), 5000)
+            VORPcore.NotifyRightTip(src, _U('NoBountys'), 5000)
             TriggerClientEvent('mms-bounty:client:nobounty', src)
         end
     end)
@@ -326,9 +297,9 @@ RegisterServerEvent('mms-bounty:server:deletesheriffbountyfromdb',function(id)
         if result ~= nil then
             MySQL.execute('DELETE FROM mms_sheriffbounty WHERE id = ?', { id }, function()
             end)
-            VORPcore.NotifyTip(src, _U('SheriffBountyDelted'),  5000)
+            VORPcore.NotifyRightTip(src, _U('SheriffBountyDelted'),  5000)
         else
-            VORPcore.NotifyTip(src, 'Error This Id not in Database ( Database Error Contact Support)!',  5000)
+            VORPcore.NotifyRightTip(src, 'Error This Id not in Database ( Database Error Contact Support)!',  5000)
         end
     end)
 end)
@@ -342,7 +313,7 @@ for _, player in ipairs(GetPlayers()) do
         for y, e in pairs(Config.Jobs) do
             if userjob == e.JobName then
                 TriggerClientEvent('mms-bounty:client:alertpolice',player,Tresor)
-                VORPcore.NotifyTip(player, _U('HeistActive'), 10000)
+                VORPcore.NotifyRightTip(player, _U('HeistActive'), 10000)
             end
         end
 end
@@ -369,7 +340,7 @@ RegisterServerEvent('mms-bounty:server:CheckifheistActive',function()
         heistactive = true
         TriggerClientEvent('mms-bounty:client:startheist2',src)
     else
-        VORPcore.NotifyTip(src, _U('HeistInCooldown'), 5000)
+        VORPcore.NotifyRightTip(src, _U('HeistInCooldown'), 5000)
     end
 end)
 
@@ -388,9 +359,49 @@ Citizen.CreateThread(function ()
     end
 end)
 
-AddEventHandler('playerDropped', function(reason)
+-----------------------------------------------
+------------- Register Callback ---------------
+-----------------------------------------------
+
+VORPcore.Callback.Register('mms-bounty:callback:GetClosePlayers', function(source,cb)
     local src = source
-    bountyGroups[src] = nil
+    local MyPed = GetPlayerPed(src)
+    local MyCoords = GetEntityCoords(MyPed)
+    local CloseUsers = {}
+    for h,v in ipairs(GetPlayers()) do
+        local Ped = GetPlayerPed(v)
+        local Coords = GetEntityCoords(Ped)
+        local Distance = #(MyCoords - Coords)
+        local Chars = VORPcore.getUser(v).getUsedCharacter
+        if Distance > 0.2 and Distance < Config.GroupRange then
+            table.insert(CloseUsers, Chars)
+        end
+    end
+    cb (CloseUsers)
+end)
+
+RegisterServerEvent('mms-bounty:server:SetGPSandBlipGroup',function(selected,PickedUsers,GroupOwner)
+    for h,v in ipairs(GetPlayers()) do
+        local Character = VORPcore.getUser(v).getUsedCharacter
+        local UserID = v
+        for h,v in ipairs (PickedUsers) do
+            if v.charIdentifier == Character.charIdentifier then
+                TriggerClientEvent('mms-bounty:client:SetGPSAndBlipGroup',UserID,selected,GroupOwner)
+            end
+        end
+    end
+end)
+
+RegisterServerEvent('mms-bounty:server:AbortBountyGroup',function(PickedUsers)
+    for h,v in ipairs(GetPlayers()) do
+        local Character = VORPcore.getUser(v).getUsedCharacter
+        local UserID = v
+        for h,v in ipairs(PickedUsers) do
+            if v.charIdentifier == Character.charIdentifier then
+                TriggerClientEvent('mms-bounty:client:AbortBountyGroup',UserID )
+            end
+        end
+    end
 end)
 
 -------WEBHOOK-----
