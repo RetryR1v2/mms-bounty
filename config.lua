@@ -1,5 +1,5 @@
 Config = {}
-
+Config.Debug = false
 --------------- WEBHOOK
 
 Config.WebHook = true

@@ -56,10 +56,16 @@ end)
 ---------------------------------------------------------------------------------
 
 Citizen.CreateThread(function()
-    while playerjob == nil do
+    if Config.Debug then
         Citizen.Wait(1000)
         TriggerServerEvent('mms-bounty:server:getplayerjob')
     end
+end)
+
+RegisterNetEvent('vorp:SelectedCharacter')
+AddEventHandler('vorp:SelectedCharacter', function()
+    Citizen.Wait(15000)
+    TriggerServerEvent('mms-bounty:server:getplayerjob')
 end)
 
 RegisterNetEvent('mms-bounty:client:getplayerjob')

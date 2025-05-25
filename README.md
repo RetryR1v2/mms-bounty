@@ -70,6 +70,8 @@
 - 1.2.9 Added Group Support
 - Added Group Rewards
 - Added Webhook for Group
+- 1.3.0 Small Bug Fix
+- Added Config.Debug Turn Off on Live Servers.
 
 # installation 
 
