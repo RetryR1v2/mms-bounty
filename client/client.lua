@@ -1218,16 +1218,18 @@ AddEventHandler('mms-bounty:client:haslockpick',function(Cops)
     Citizen.Wait(1000)
     MiniGame.Start('lockpick', lockpicksettings, function(result)
         if result.unlocked == true then
-            VORPcore.NotifyRightTip(_U('LockpickingSuccess'), 5000)
-            Citizen.Wait(3000)
                 if Config.HeistNpcs == true then
                     progressbar.start('Tresor wird Geknackt!', 5000, function ()
                     end, 'linear')
                     SpawnCops(Cops)
+                    VORPcore.NotifyRightTip(_U('LockpickingSuccess'), 5000)
+                    Citizen.Wait(3000)
                 elseif Config.HeistNpcs == false then
                     progressbar.start('Tresor wird Geknackt!', 5000, function ()
                     end, 'linear')
                     ResetHeist()
+                    VORPcore.NotifyRightTip(_U('LockpickingSuccess'), 5000)
+                    Citizen.Wait(3000)
                 end
         else
             VORPcore.NotifyRightTip(_U('LockpickingFailed'), 5000)

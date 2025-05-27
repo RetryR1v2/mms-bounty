@@ -73,6 +73,7 @@
 - 1.3.0 Small Bug Fix
 - Added Config.Debug Turn Off on Live Servers.
 - 1.3.1 fixed menu error
+- 1.3.2 Fixed tresor bug
 
 # installation 
 
