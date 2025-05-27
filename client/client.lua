@@ -1093,7 +1093,7 @@ end)
 
 RegisterNetEvent('mms-bounty:client:abortheist')
 AddEventHandler('mms-bounty:client:abortheist',function()
-    BountyBoard:Close({})
+    HeistBoard:Close({})
     if HeistActive == true then
         AbortedBounty = true
         ResetHeist()
@@ -1111,7 +1111,7 @@ end)
 
 RegisterNetEvent('mms-bounty:client:startheist2')
 AddEventHandler('mms-bounty:client:startheist2',function()
-    if HeistActive == false then
+    if not HeistActive then
         TriggerServerEvent('mms-bounty:server:startheistwebhook')
         VORPcore.NotifyRightTip(_U('HeistStartetSuccessfully'), 5000)
         HeistActive = true
